@@ -55,12 +55,11 @@ public class InformeDAO {
 	    EntityManager em = emf.createEntityManager();
 	    try {
 	        return em.createQuery(
-	                "SELECT i FROM Informe i WHERE i.estadoInforme = 'Pendiente' OR i.estadoInforme = 'En revisión'",
+	                "SELECT i FROM Informe i WHERE i.estado = 'Pendiente' OR i.estado = 'En revisión'",
 	                Informe.class)
 	                .getResultList();
 	    } catch (Exception e) {
-	        e.printStackTrace();
-	        return new ArrayList<>();
+	        throw new RuntimeException("Error al obtener informes pendientes", e);
 	    } finally {
 	        em.close();
 	    }
