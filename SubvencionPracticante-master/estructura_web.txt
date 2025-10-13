@@ -1,0 +1,9 @@
+C:\Users\USER\Downloads\SubvencionPracticante-master\SubvencionPracticante-master\src\main\webapp\login.jsp
+C:\Users\USER\Downloads\SubvencionPracticante-master\SubvencionPracticante-master\src\main\webapp\META-INF
+C:\Users\USER\Downloads\SubvencionPracticante-master\SubvencionPracticante-master\src\main\webapp\views
+C:\Users\USER\Downloads\SubvencionPracticante-master\SubvencionPracticante-master\src\main\webapp\WEB-INF
+C:\Users\USER\Downloads\SubvencionPracticante-master\SubvencionPracticante-master\src\main\webapp\META-INF\MANIFEST.MF
+C:\Users\USER\Downloads\SubvencionPracticante-master\SubvencionPracticante-master\src\main\webapp\views\elaborar_informe.jsp
+C:\Users\USER\Downloads\SubvencionPracticante-master\SubvencionPracticante-master\src\main\webapp\views\jefeUnidad.jsp
+C:\Users\USER\Downloads\SubvencionPracticante-master\SubvencionPracticante-master\src\main\webapp\views\practicante.jsp
+C:\Users\USER\Downloads\SubvencionPracticante-master\SubvencionPracticante-master\src\main\webapp\WEB-INF\web.xml
