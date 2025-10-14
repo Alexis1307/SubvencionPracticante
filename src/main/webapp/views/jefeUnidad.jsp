@@ -24,20 +24,6 @@
 <nav class="navbar">
     <div class="navbar-left">
         <a href="#inicio">Inicio</a>
-        <div class="notificaciones">
-            <button id="btnNotificaciones">
-                Notificaciones
-                <span class="badge" id="badgeNotificaciones">1</span>
-            </button>
-            <div class="notificaciones-lista" id="listaNotificaciones">
-                <div class="notificacion" onclick="irRevision()">
-                    <div class="notificacion-titulo">Nuevo informe recibido</div>
-                    <div class="notificacion-contenido">
-                        Revisa los informes enviados por los practicantes.
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
     <button onclick="cerrarSesion()">Cerrar sesión</button>
 </nav>
@@ -59,28 +45,20 @@
             </thead>
             <tbody>
                 <% if (informes != null && !informes.isEmpty()) {
-                    int index = 1;
                     for (Informe informe : informes) {
                         String nombreArchivo = new java.io.File(informe.getRutaDocumento()).getName();
-                        String idEstado = "estado-informe-" + index;
-                        String idAprobar = "btn-aprobar-" + index;
-                        String idRechazar = "btn-rechazar-" + index;
                 %>
-                <tr onclick="verDocumento('<%= nombreArchivo %>')" class="fila-informe">
-                    <td><%= nombreArchivo %></td>
+                <tr>
+                    <td onclick="verDocumento('<%= nombreArchivo %>')" style="cursor:pointer;"><%= nombreArchivo %></td>
                     <td><%= informe.getFechaEnvio().toLocalDate() %></td>
                     <td><%= informe.getRol().getNombreRol() %></td>
-                    <td id="<%= idEstado %>"><%= informe.getEstado() %></td>
+                    <td><%= informe.getEstado() %></td>
                     <td>
-                        <button class="btn-aprobar"
-                                onclick="event.stopPropagation(); aprobarInforme(<%= informe.getInformeID() %>, '<%= idEstado %>')"
-                                id="<%= idAprobar %>">Aprobar</button>
-                        <button class="btn-rechazar"
-                                onclick="event.stopPropagation(); rechazarInforme(<%= informe.getInformeID() %>, '<%= idEstado %>')"
-                                id="<%= idRechazar %>">Rechazar</button>
+                        <button onclick="mostrarModalFirma(<%= informe.getInformeID() %>)">Aprobar</button>
+                        <button onclick="mostrarModalRechazo(<%= informe.getInformeID() %>)">Rechazar</button>
                     </td>
                 </tr>
-                <% index++; } } else { %>
+                <% } } else { %>
                     <tr>
                         <td colspan="5">No hay informes pendientes.</td>
                     </tr>
@@ -88,42 +66,58 @@
             </tbody>
         </table>
     </div>
-
-    <!-- Modales -->
-    <div id="modalObservacion" class="modal">
-        <div class="modal-contenido modal-observacion">
-            <h3>Agregar observación</h3>
-            <textarea id="observacionTexto" required></textarea>
-            <div id="notificacionEnvio">Observaciones enviadas correctamente.</div>
-            <div class="modal-botones">
-                <button onclick="enviarObservacion()" class="btn-enviar">Enviar observaciones</button>
-                <button onclick="cerrarModal('modalObservacion')" class="btn-cerrar">Cerrar</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="modalDocumento" class="modal">
-        <div class="modal-contenido modal-documento">
-            <h3>Visualizar Informe de Prácticas</h3>
-            <div id="visorDocumento"></div>
-            <div id="notificacionRRHH">Informe enviado a RRHH</div>
-            <div id="botonesModalDocumento"></div>
-        </div>
-    </div>
-
-    <div id="modalFirmaRRHH" class="modal">
-        <div class="modal-contenido modal-firma">
-            <h3>Validar Firma Digital</h3>
-            <input id="firmaUsuarioRRHH" type="text" placeholder="Usuario" required />
-            <input id="firmaContraRRHH" type="password" placeholder="Contraseña" required />
-            <div id="firmaErrorRRHH">Credenciales incorrectas</div>
-            <button onclick="validarFirmaRRHH()" class="btn-validar">Validar y Enviar</button>
-            <button onclick="cerrarModal('modalFirmaRRHH')" class="btn-cerrar">Cerrar</button>
-        </div>
-    </div>
 </section>
 
-<script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
-<script src="../js/jefeUnidad.js"></script>
+<!-- Modal de firma -->
+<div id="modalFirma" style="display:none;">
+    <form action="${pageContext.request.contextPath}/procesarInforme" method="post">
+        <input type="hidden" name="informeId" id="firma_informeId" />
+        <input type="hidden" name="accion" value="aprobar" />
+
+        <label>Usuario:</label>
+        <input type="text" name="usuario" required />
+
+        <label>Contraseña:</label>
+        <input type="password" name="contrasena" required />
+
+        <label>Comentario:</label>
+        <textarea name="comentario"></textarea>
+
+        <button type="submit">Confirmar Firma</button>
+        <button type="button" onclick="cerrarModal('modalFirma')">Cancelar</button>
+    </form>
+</div>
+
+<!-- Modal de rechazo -->
+<div id="modalRechazo" style="display:none;">
+    <form method="post" action="<%= request.getContextPath() %>/procesarInforme">
+        <input type="hidden" name="informeId" id="rechazo_informeId">
+        <input type="hidden" name="accion" value="rechazar">
+        <label>Comentario:</label><br>
+        <textarea name="comentario" required></textarea><br>
+        <button type="submit">Enviar Rechazo</button>
+        <button type="button" onclick="cerrarModal('modalRechazo')">Cancelar</button>
+    </form>
+</div>
+
+<script>
+    function mostrarModalFirma(informeId) {
+        document.getElementById('firma_informeId').value = informeId;
+        document.getElementById('modalFirma').style.display = 'block';
+    }
+
+    function mostrarModalRechazo(informeId) {
+        document.getElementById('rechazo_informeId').value = informeId;
+        document.getElementById('modalRechazo').style.display = 'block';
+    }
+
+    function cerrarModal(id) {
+        document.getElementById(id).style.display = 'none';
+    }
+
+    function cerrarSesion() {
+        window.location.href = "<%= request.getContextPath() %>/logout";
+    }
+</script>
 </body>
 </html>

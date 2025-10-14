@@ -1,7 +1,11 @@
 package dao;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -93,4 +97,37 @@ public class InformeDAO {
 
 	    return actualizado;
 	}
+	
+	 public void actualizarRutaInforme(int informeId, String nuevaRuta) {
+	        EntityManager em = emf.createEntityManager();
+	        EntityTransaction tx = em.getTransaction();
+
+	        try {
+	            tx.begin();
+
+	            Informe informe = em.find(Informe.class, informeId);
+	            if (informe != null) {
+	                informe.setRutaDocumento(nuevaRuta);
+	                em.merge(informe); // No es obligatorio aquí, pero es seguro
+	            }
+
+	            tx.commit();
+	        } catch (Exception e) {
+	            if (tx.isActive()) {
+	                tx.rollback();
+	            }
+	            e.printStackTrace();
+	        } finally {
+	            em.close();
+	        }
+	    }
+	 
+	 public Informe obtenerInformePorId(int id) {
+		    EntityManager em = emf.createEntityManager();
+		    try {
+		        return em.find(Informe.class, id);
+		    } finally {
+		        em.close();
+		    }
+		}
 }

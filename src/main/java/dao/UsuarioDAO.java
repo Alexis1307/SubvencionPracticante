@@ -33,4 +33,19 @@ public class UsuarioDAO {
 
 	    return usuario;
 	}
+	
+	public Usuario validarCredenciales(String nombreUsuario, String contrasena) {
+	    try {
+	    	EntityManager em = emf.createEntityManager(); 
+
+	        TypedQuery<Usuario> query = em.createQuery(
+	            "SELECT u FROM Usuario u WHERE u.nombreUsuario = :usuario AND u.contrasena = :pass", Usuario.class);
+	        query.setParameter("usuario", nombreUsuario);
+	        query.setParameter("pass", contrasena);
+	        return query.getSingleResult();
+	    } catch (NoResultException e) {
+	        return null;
+	    }
+	}
+
 }
