@@ -35,7 +35,6 @@ public class InformeFlujo {
     @Column(name = "Fecha")
     private LocalDateTime fecha;
 
-    // Getters y Setters
 
     public int getFlujoId() {
         return flujoId;

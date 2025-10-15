@@ -211,3 +211,59 @@ const JefeUnidadModule = (() => {
 })();
 
 document.addEventListener('DOMContentLoaded', () => JefeUnidadModule.init());
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Botones aprobar
+    document.querySelectorAll('.btn-action-aprobar').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-id');
+            document.getElementById('modalAprobarInformeId').value = id;
+            const modal = new bootstrap.Modal(document.getElementById('modalAprobar'));
+            modal.show();
+        });
+    });
+
+    // Botones rechazar
+    document.querySelectorAll('.btn-action-rechazar').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-id');
+            const comentario = prompt("Ingrese observaciones para el rechazo:");
+            if (!comentario) {
+                return;
+            }
+            // Hacer submit mediante formulario oculto
+            const form = document.createElement('form');
+            form.method = 'post';
+            form.action = contextPath + '/procesarInforme';
+            // campos
+            const f1 = document.createElement('input');
+            f1.type = 'hidden'; f1.name = 'informeId'; f1.value = id;
+            form.appendChild(f1);
+            const f2 = document.createElement('input');
+            f2.type = 'hidden'; f2.name = 'accion'; f2.value = 'rechazar';
+            form.appendChild(f2);
+            const f3 = document.createElement('input');
+            f3.type = 'hidden'; f3.name = 'comentario'; f3.value = comentario;
+            form.appendChild(f3);
+            document.body.appendChild(form);
+            form.submit();
+        });
+    });
+});
+
+function verDocumento(nombreArchivo) {
+    const modal = document.getElementById('modalDocumento');
+    const visor = document.getElementById('visorDocumento');
+
+    let ruta = `${contextPath}/verInforme?archivo=${encodeURIComponent(nombreArchivo)}`;
+
+    visor.innerHTML = `<iframe src="${ruta}" style="width:100%; height:100%;" frameborder="0"></iframe>`;
+
+    modal.style.display = 'flex';
+}
+
+
+function cerrarModal(idModal) {
+    const modal = document.getElementById(idModal);
+    if (modal) modal.style.display = 'none';
+}

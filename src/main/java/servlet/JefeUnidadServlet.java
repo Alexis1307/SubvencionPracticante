@@ -25,18 +25,15 @@ public class JefeUnidadServlet extends HttpServlet {
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+    	System.out.println("Jefe de unidad Ejecutado");
     	
-    	System.out.println("Jefe Unidad Servlet");
-
         HttpSession session = request.getSession(false);
         
         if (session == null || session.getAttribute("usuarioLogueado") == null) {
         	response.sendRedirect(request.getContextPath() + "/login.jsp");
             return;
         }
-        
-    	System.out.println("Sesion: " + session);
-        
+                
         Usuario usuario = (Usuario) session.getAttribute("usuarioLogueado");
 
         if (usuario == null || !usuario.esJefeUnidad()) {
@@ -48,7 +45,10 @@ public class JefeUnidadServlet extends HttpServlet {
 
         List<Informe> informesPendientes = informeDAO.obtenerInformesPendientes();
         
-        
+        System.out.println("Total informes: " + informesPendientes.size());
+        for (Informe i : informesPendientes) {
+            System.out.println("Informe ID: " + i.getInformeID() + ", Usuario: " + i.getPracticante());
+        }
 
         request.setAttribute("informes", informesPendientes);
         request.getRequestDispatcher("views/jefeUnidad.jsp").forward(request, response);

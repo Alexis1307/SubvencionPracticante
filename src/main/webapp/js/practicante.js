@@ -312,3 +312,17 @@ const PanelPracticante = (() => {
 document.addEventListener('DOMContentLoaded', () => {
   PanelPracticante.init();
 });
+
+function verDocumento(basePath, archivo, tipo) {
+    const url = `${basePath}/verInforme?archivo=${encodeURIComponent(archivo)}&tipo=${tipo}`;
+    const visor = document.getElementById('visorDocumento');
+    visor.innerHTML = `<iframe src="${url}" width="100%" height="100%"></iframe>`;
+    document.getElementById('modalDocumento').style.display = 'block';
+}
+
+
+
+function cerrarModal(idModal) {
+    const modal = document.getElementById(idModal);
+    if (modal) modal.style.display = 'none';
+}

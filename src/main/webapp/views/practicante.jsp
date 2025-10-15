@@ -1,4 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ page import="jakarta.servlet.http.*, model.Usuario" %>
 <%
 HttpSession sesion = request.getSession(false);
@@ -18,7 +20,7 @@ if (usuario == null) {
     <title>Panel del Practicante | Sistema de Subvenciones</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/panel.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/practicante.css">
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-gradient-primary shadow-sm sticky-top">
@@ -46,7 +48,7 @@ if (usuario == null) {
                         </button>
                     </li>
                     <li class="nav-item">
-                        <form action="${pageContext.request.contextPath}/cerrarSesion" method="post" class="d-inline">
+                        <form action="${pageContext.request.contextPath}/logout" method="post" class="d-inline">
                             <button type="submit" class="btn btn-light btn-sm" id="logoutBtn">
                                 <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
                             </button>
@@ -81,11 +83,11 @@ if (usuario == null) {
                         </div>
                     </div>
                     <div class="stats-content">
-                        <h3 class="stats-number">5</h3>
+						<h3 class="stats-number">${pendientes}</h3>
                         <p class="stats-label">Informes Enviados</p>
                         <div class="stats-progress">
                             <div class="progress-bar bg-primary" style="width: 100%"></div>
-                        </div>
+                        </div> 
                     </div>
                 </div>
             </div>
@@ -97,11 +99,11 @@ if (usuario == null) {
                         </div>
                     </div>
                     <div class="stats-content">
-                        <h3 class="stats-number">3</h3>
+						<h3 class="stats-number">${aprobados}</h3>
                         <p class="stats-label">Informes Aprobados</p>
                         <div class="stats-progress">
                             <div class="progress-bar bg-success" style="width: 60%"></div>
-                        </div>
+                        </div> 
                     </div>
                 </div>
             </div>
@@ -112,12 +114,12 @@ if (usuario == null) {
                             <i class="fas fa-clock"></i>
                         </div>
                     </div>
-                    <div class="stats-content">
-                        <h3 class="stats-number">2</h3>
-                        <p class="stats-label">Informes Pendientes</p>
+                     <div class="stats-content">
+						<h3 class="stats-number">${rechazados}</h3>
+                        <p class="stats-label">Informes Rechazados</p>
                         <div class="stats-progress">
                             <div class="progress-bar bg-warning" style="width: 40%"></div>
-                        </div>
+                        </div> 
                     </div>
                 </div>
             </div>
@@ -151,64 +153,57 @@ if (usuario == null) {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td class="text-center fw-bold">1</td>
-                                        <td>Informe Inicial de Actividades</td>
-                                        <td class="text-center">Periodo 3</td>
-                                        <td class="text-center">10/01/2025</td>
-                                        <td class="text-center">
-                                            <span class="badge status-badge bg-success">Enviado</span>
-                                        </td>
-                                        <td class="text-center">
-                                            <div class="btn-group btn-group-sm" role="group">
-                                                <button class="btn btn-outline-primary" data-bs-toggle="tooltip" title="Ver detalles">
-                                                    <i class="fas fa-eye"></i>
-                                                </button>
-                                                <button class="btn btn-outline-secondary" data-bs-toggle="tooltip" title="Descargar">
-                                                    <i class="fas fa-download"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-center fw-bold">2</td>
-                                        <td>Reporte de Avances Mensuales</td>
-                                        <td class="text-center">Periodo 2</td>
-                                        <td class="text-center">15/12/2024</td>
-                                        <td class="text-center">
-                                            <span class="badge status-badge bg-warning">Pendiente</span>
-                                        </td>
-                                        <td class="text-center">
-                                            <div class="btn-group btn-group-sm" role="group">
-                                                <button class="btn btn-outline-primary" data-bs-toggle="tooltip" title="Ver detalles">
-                                                    <i class="fas fa-eye"></i>
-                                                </button>
-                                                <button class="btn btn-outline-secondary" data-bs-toggle="tooltip" title="Descargar">
-                                                    <i class="fas fa-download"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-center fw-bold">3</td>
-                                        <td>Informe de Resultados Finales</td>
-                                        <td class="text-center">Periodo 1</td>
-                                        <td class="text-center">20/11/2024</td>
-                                        <td class="text-center">
-                                            <span class="badge status-badge bg-danger">Rechazado</span>
-                                        </td>
-                                        <td class="text-center">
-                                            <div class="btn-group btn-group-sm" role="group">
-                                                <button class="btn btn-outline-primary" data-bs-toggle="tooltip" title="Ver detalles">
-                                                    <i class="fas fa-eye"></i>
-                                                </button>
-                                                <button class="btn btn-outline-warning" data-bs-toggle="tooltip" title="Editar">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
+								    <c:forEach var="informe" items="${informes}" varStatus="status">
+								        <tr>
+								            <td class="text-center fw-bold">${status.index + 1}</td>
+								            <td>${informe.asunto}</td>
+								            <td class="text-center"> ${informe.periodoPracticas}</td>
+								            <td class="text-center">
+								                <fmt:formatDate value="${informe.fechaEnvioDate}" pattern="dd/MM/yyyy"/>
+								            </td>
+								            <td class="text-center">
+								                <c:choose>
+								                    <c:when test="${informe.estado == 'Aprobado'}">
+								                        <span class="badge status-badge bg-success">Aprobado</span>
+								                    </c:when>
+								                    <c:when test="${informe.estado == 'Pendiente'}">
+								                        <span class="badge status-badge bg-warning">Pendiente</span>
+								                    </c:when>
+								                    <c:when test="${informe.estado == 'Rechazado'}">
+								                        <span class="badge status-badge bg-danger">Rechazado</span>
+								                    </c:when>
+								                    <c:otherwise>
+								                        <span class="badge status-badge bg-secondary">${informe.estado}</span>
+								                    </c:otherwise>
+								                </c:choose>
+								            </td>
+								            <td class="text-center">
+											    <div class="btn-group btn-group-sm" role="group">
+											        <c:choose>
+													    <c:when test="${informe.estado == 'Aprobado'}">
+													        <button class="btn btn-outline-primary"
+													            onclick="verDocumento('${pageContext.request.contextPath}', '${informe.nombreDocumento}', 'firmado')">
+													            <i class="fas fa-eye"></i>
+													        </button>
+													    </c:when>
+													    <c:otherwise>
+													        <button class="btn btn-outline-primary"
+													            onclick="verDocumento('${pageContext.request.contextPath}', '${informe.nombreDocumento}', 'practicante')">
+													            <i class="fas fa-eye"></i>
+													        </button>
+													    </c:otherwise>
+													</c:choose>					
+											        <a href="${pageContext.request.contextPath}/archivos/${informe.rutaDocumento}"
+											           class="btn btn-outline-secondary"
+											           download
+											           data-bs-toggle="tooltip" title="Descargar">
+											            <i class="fas fa-download"></i>
+											        </a>
+											    </div>
+											</td>
+								        </tr>
+								    </c:forEach>
+								</tbody>
                             </table>
                         </div>
                     </div>
@@ -241,8 +236,19 @@ if (usuario == null) {
             </div>
         </div>
     </footer>
+    
+    <div id="modalDocumento" style="display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); z-index: 1050;">
+	    <div class="modal-content bg-white shadow rounded p-3" style="width: 80%; height: 90%; position: relative;">
+	        <button type="button" class="btn-close position-absolute top-0 end-0 m-3" aria-label="Cerrar" onclick="cerrarModal('modalDocumento')"></button>
+	        <div id="visorDocumento" style="width: 100%; height: 100%;"></div>
+	    </div>
+	</div>
+
+    
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="${pageContext.request.contextPath}/js/panelPracticante.js"></script>
+    <!-- <script src="${pageContext.request.contextPath}/js/practicante.js"></script> -->
+    <script>const contextPath = '<%= request.getContextPath() %>';</script>
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/practicante.js"></script>
 </body>
 </html>

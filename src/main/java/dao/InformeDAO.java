@@ -44,13 +44,14 @@ public class InformeDAO {
 	public List<Informe> obtenerInformes(int practicanteId) {
 	    EntityManager em = emf.createEntityManager();
 	    try {
-	        return em.createQuery("SELECT i FROM Informe i WHERE i.practicanteId = :id", Informe.class)
-	                 .setParameter("id", practicanteId)
-	                 .getResultList();
-	    }catch (Exception e) {
+	        return em.createQuery(
+	            "SELECT i FROM Informe i WHERE i.practicante.usuarioId = :id", Informe.class)
+	            .setParameter("id", practicanteId)
+	            .getResultList();
+	    } catch (Exception e) {
 	        e.printStackTrace();
 	        return new ArrayList<>();
-	    }  finally {
+	    } finally {
 	        em.close();
 	    }
 	}

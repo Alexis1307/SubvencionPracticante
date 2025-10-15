@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.Informe;
+import model.Rol;
 import model.Usuario;
 
 import java.io.File;
@@ -30,7 +31,8 @@ public class ElaborarInformeServlet extends HttpServlet {
     private static final String PDF_BASE_PATH = "C:\\ProyectoSubvencionPDF\\practicante";
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // Obtener el usuario de la sesión
+        System.out.println("Elaborar Informe");
+    	// Obtener el usuario de la sesión
         HttpSession session = request.getSession();
         Usuario practicante = (Usuario) session.getAttribute("usuarioLogueado");
 
@@ -55,7 +57,8 @@ public class ElaborarInformeServlet extends HttpServlet {
         String nombreArchivo = "Informe_" + practicante.getNombreUsuario() + "_" + System.currentTimeMillis() + ".pdf";
         String rutaCompleta = PDF_BASE_PATH + File.separator + nombreArchivo;
 
-        // Generar el PDF
+
+
         try {
             Document documento = new Document();
             File carpeta = new File(PDF_BASE_PATH);
@@ -72,29 +75,35 @@ public class ElaborarInformeServlet extends HttpServlet {
             documento.add(new Paragraph("Área de trabajo: " + nombreArea));
             documento.add(new Paragraph("Fecha de envío: " + fechaEnvio.toLocalDate()));
             documento.add(new Paragraph("Periodo de prácticas: " + periodo + " meses"));
-            documento.add(new Paragraph("Actividades: \n" + actividades));
+            documento.add(new Paragraph("\n\nActividades: \n" + actividades));
             documento.close();
         } catch (DocumentException e) {
             e.printStackTrace();
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error al generar el PDF.");
             return;
         }
+        
+        Rol rol = new Rol();
 
         // Guardar el informe en la base de datos
         Informe informe = new Informe();
-        informe.setPracticanteId(practicante.getUsuarioId());
+        informe.setPracticante(practicante);
         informe.setAsunto(asunto);
-        informe.setRolId(practicante.getRolId());
+        rol.setRolId(practicante.getRolId());
+        informe.setRol(rol);
         informe.setPeriodoPracticas(periodo);
         informe.setActividades(actividades);
-        informe.setRutaDocumento(rutaCompleta);
+        informe.setRutaDocumento(rutaCompleta); 
+        informe.setNombreDocumento(nombreArchivo);
         informe.setFechaEnvio(fechaEnvio);
         informe.setEstado("Pendiente");
 
         InformeDAO informeDAO = new InformeDAO();
         informeDAO.guardarInforme(informe);
 
-        request.setAttribute("mensajeExito", "1");
+
+        request.setAttribute("mensajeExito", "Informe enviado correctamente.");
+        request.setAttribute("mensajeError", "Hubo un error al enviar el informe. Inténtalo nuevamente.");
         request.getRequestDispatcher("views/elaborar_informe.jsp").forward(request, response);
     }
 }

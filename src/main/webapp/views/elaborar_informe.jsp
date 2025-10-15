@@ -63,7 +63,7 @@
                         </a>
                     </li>
                     <li class="breadcrumb-item">
-                        <a href="<%= request.getContextPath() %>/views/practicante.jsp">Panel del Practicante</a>
+                        <a href="<%= request.getContextPath() %>/views/practicante">Panel del Practicante</a>
                     </li>
                     <li class="breadcrumb-item active">Elaborar Informe</li>
                 </ol>
@@ -89,7 +89,7 @@
                     </div>
                 <% } %>
 
-                <form id="formInforme" action="<%= request.getContextPath() %>/PracticanteServlet" method="POST">
+				<form id="formInforme" action="<%= request.getContextPath() %>/elaborarInforme" method="POST">
                     <div class="row g-4">
                         <div class="col-md-6">
                             <label for="asunto" class="form-label">

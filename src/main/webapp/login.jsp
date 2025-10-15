@@ -1,7 +1,8 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
-String errorLogin = (String) request.getAttribute("errorLogin");
+String error = (String) request.getAttribute("error");
 String mensaje = (String) request.getAttribute("mensaje");
+
 HttpSession sesion = request.getSession(false);
 if (sesion != null && sesion.getAttribute("usuarioLogueado") != null) {
     response.sendRedirect(request.getContextPath() + "/dashboard");
@@ -32,10 +33,10 @@ if (sesion != null && sesion.getAttribute("usuarioLogueado") != null) {
                 <p class="login-subtitle">Ingresa tus credenciales para continuar</p>
             </div>
 
-            <% if (errorLogin != null && !errorLogin.isEmpty()) { %>
+            <% if (error != null && !error.isEmpty()) { %>
             <div class="alert alert-error">
                 <i class="fas fa-exclamation-circle"></i>
-                <span><%= errorLogin %></span>
+                <span><%= error %></span>
             </div>
             <% } %>
 
@@ -52,16 +53,15 @@ if (sesion != null && sesion.getAttribute("usuarioLogueado") != null) {
                 <div class="form-group">
                     <label for="correo" class="form-label">
                         <i class="fas fa-envelope"></i>
-                        Correo Electrónico
+                        Usuario
                     </label>
                     <input 
-                        type="email" 
-                        id="correo" 
-                        name="correo" 
-                        class="form-control" 
-                        placeholder="usuario@ejemplo.com"
-                        autocomplete="email"
-                        autofocus>
+					    type="text" 
+					    id="correo" 
+					    name="nombreUsuario"  
+					    class="form-control" 
+					    placeholder="Usuario"
+					    autofocus>
                 </div>
 
                 <div class="form-group">
@@ -71,12 +71,12 @@ if (sesion != null && sesion.getAttribute("usuarioLogueado") != null) {
                     </label>
                     <div class="password-wrapper">
                         <input 
-                            type="password" 
-                            id="clave" 
-                            name="clave" 
-                            class="form-control" 
-                            placeholder="••••••••"
-                            autocomplete="current-password">
+						    type="password" 
+						    id="clave" 
+						    name="contra"  
+						    class="form-control" 
+						    placeholder="••••••••"
+						    autocomplete="current-password">
                         <button type="button" class="toggle-password" id="togglePassword" aria-label="Mostrar contraseña">
                             <i class="fas fa-eye"></i>
                         </button>

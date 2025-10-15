@@ -65,13 +65,11 @@ class LoginValidator {
 
     if (!email) {
       errors.push({ field: this.emailInput, message: 'El correo electrónico es obligatorio' });
-    } else if (!this.isValidEmail(email)) {
-      errors.push({ field: this.emailInput, message: 'El formato del correo es inválido' });
-    }
+    } 
 
     if (!password) {
       errors.push({ field: this.passwordInput, message: 'La contraseña es obligatoria' });
-    } else if (password.length < 6) {
+    } else if (password.length < 3) {
       errors.push({ field: this.passwordInput, message: 'La contraseña debe tener al menos 6 caracteres' });
     }
 
@@ -80,10 +78,7 @@ class LoginValidator {
     return errors;
   }
 
-  isValidEmail(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email.toLowerCase());
-  }
+  
 
   displayErrors(errors) {
     const errorMessages = errors.map(error => `<li>${error.message}</li>`).join('');
