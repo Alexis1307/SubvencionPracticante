@@ -52,6 +52,7 @@ public class PracticanteServlet extends HttpServlet {
         for (Informe informe : listaInformes) {
             switch (informe.getEstado()) {
                 case "Pendiente" -> pendientes++;
+                case "En revisión" -> pendientes++;
                 case "Aprobado" -> aprobados++;
                 case "Rechazado" -> rechazados++;
             }

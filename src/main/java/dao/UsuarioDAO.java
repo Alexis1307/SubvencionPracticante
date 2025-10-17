@@ -48,4 +48,18 @@ public class UsuarioDAO {
 	    }
 	}
 
+	public Usuario obtenerJefeUnidad() {
+	    EntityManager em = emf.createEntityManager();
+	    try {
+	        return em.createQuery(
+	            "SELECT u FROM Usuario u WHERE LOWER(u.nombreUsuario) = :nombre", Usuario.class)
+	            .setParameter("nombre", "jefeunidad") 
+	            .getSingleResult();
+	    } catch (NoResultException e) {
+	        System.out.println("No se encontró el jefe de unidad.");
+	        return null;
+	    } finally {
+	        em.close();
+	    }
+	}
 }

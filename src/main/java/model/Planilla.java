@@ -1,7 +1,8 @@
 package model;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
+
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "Planillas")
@@ -21,15 +22,11 @@ public class Planilla {
     private String rutaDocumento;
 
     @Column(name = "FechaCreacion", nullable = false)
-    private LocalDateTime fechaCreacion;
+    private LocalDate fechaCreacion;
 
     @Column(name = "EstadoPlanilla", nullable = false, length = 50)
     private String estadoPlanilla;
 
-    public Planilla() {
-        // Valor por defecto para fecha de creación
-        this.fechaCreacion = LocalDateTime.now();
-    }
 
     // Getters y setters
 
@@ -57,11 +54,11 @@ public class Planilla {
         this.rutaDocumento = rutaDocumento;
     }
 
-    public LocalDateTime getFechaCreacion() {
+    public LocalDate getFechaCreacion() {
         return fechaCreacion;
     }
 
-    public void setFechaCreacion(LocalDateTime fechaCreacion) {
+    public void setFechaCreacion(LocalDate fechaCreacion) {
         this.fechaCreacion = fechaCreacion;
     }
 

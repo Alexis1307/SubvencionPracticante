@@ -113,9 +113,13 @@
                 <i class="fas fa-info-circle me-2"></i>Leyenda de Estados
             </h6>
             <div class="d-flex flex-wrap gap-3">
+            	<div class="d-flex align-items-center">
+                    <span class="badge bg-secondary me-2">Pendiente</span>
+                    <small class="text-muted">Pendiente a Revisar</small>
+                </div>
                 <div class="d-flex align-items-center">
                     <span class="badge bg-warning me-2">En revisión</span>
-                    <small class="text-muted">Pendiente de aprobación</small>
+                    <small class="text-muted">Falta Aprobación</small>
                 </div>
                 <div class="d-flex align-items-center">
                     <span class="badge bg-success me-2">Aprobado</span>
@@ -162,10 +166,6 @@
                     <div class="mb-3">
                         <label for="contrasenaAprobar" class="form-label">Contraseña</label>
                         <input type="password" name="contrasena" id="contrasenaAprobar" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="comentarioAprobar" class="form-label">Comentario</label>
-                        <textarea name="comentario" id="comentarioAprobar" class="form-control" required></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">

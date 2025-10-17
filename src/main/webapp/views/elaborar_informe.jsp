@@ -30,7 +30,7 @@
             <div class="collapse navbar-collapse" id="navbarContent">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="<%= request.getContextPath() %>/views/practicante.jsp">
+                        <a class="nav-link" href="<%= request.getContextPath() %>/practicante">
                             <i class="fas fa-arrow-left me-2"></i>Volver al Panel
                         </a>
                     </li>

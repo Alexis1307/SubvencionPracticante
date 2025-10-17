@@ -1,7 +1,7 @@
 package servlet;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import dao.InformeDAO;
 import dao.InformeFlujoDAO;
@@ -60,7 +60,7 @@ public class RrhhServlet extends HttpServlet {
                 flujo.setRolDestino(null); 
                 flujo.setEstado("Aprobado");
                 flujo.setComentario(comentario);
-                flujo.setFecha(LocalDateTime.now());
+                flujo.setFecha(LocalDate.now());
                 flujoDAO.registrarFlujo(flujo);
 
                 // Notificar a practicante
@@ -69,7 +69,7 @@ public class RrhhServlet extends HttpServlet {
                     Notificacion noti = new Notificacion();
                     noti.setUsuario(practicante);
                     noti.setMensaje("Tu informe ha sido aprobado por RRHH.");
-                    noti.setFecha(LocalDateTime.now());
+                    noti.setFecha(LocalDate.now());
                     notificacionDAO.crearNotificacion(noti);
                 }
 
@@ -87,7 +87,7 @@ public class RrhhServlet extends HttpServlet {
                 flujo.setRolDestino("jefeunidad");
                 flujo.setEstado("Rechazado");
                 flujo.setComentario(comentario);
-                flujo.setFecha(LocalDateTime.now());
+                flujo.setFecha(LocalDate.now());
                 flujoDAO.registrarFlujo(flujo);
 
                 // Notificar a jefeUnidad para revisión
@@ -95,7 +95,7 @@ public class RrhhServlet extends HttpServlet {
                     Notificacion noti = new Notificacion();
                     noti.setUsuario(jefeUnidad);
                     noti.setMensaje("Informe rechazado por RRHH. Observaciones: " + comentario);
-                    noti.setFecha(LocalDateTime.now());
+                    noti.setFecha(LocalDate.now());
                     notificacionDAO.crearNotificacion(noti);
                 }
 

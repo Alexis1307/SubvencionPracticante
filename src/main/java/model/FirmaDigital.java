@@ -1,7 +1,8 @@
 package model;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
+
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "FirmasDigitales")
@@ -28,11 +29,11 @@ public class FirmaDigital {
     private String rutaImagenFirma;
 
     @Column(name = "Fecha", nullable = false)
-    private LocalDateTime fecha;
+    private LocalDate fecha;
 
     // Constructor vacío
     public FirmaDigital() {
-        this.fecha = LocalDateTime.now();
+        this.fecha = LocalDate.now();
     }
 
     // Getters y setters
@@ -77,11 +78,11 @@ public class FirmaDigital {
         this.rutaImagenFirma = rutaImagenFirma;
     }
 
-    public LocalDateTime getFecha() {
+    public LocalDate getFecha() {
         return fecha;
     }
 
-    public void setFecha(LocalDateTime fecha) {
+    public void setFecha(LocalDate fecha) {
         this.fecha = fecha;
     }
 }

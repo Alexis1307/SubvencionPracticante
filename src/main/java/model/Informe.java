@@ -1,6 +1,7 @@
 package model;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 import jakarta.persistence.Column;
@@ -30,7 +31,7 @@ public class Informe {
     @Column(name = "RutaDocumento")
     private String rutaDocumento;
     @Column(name = "FechaEnvio")
-    private LocalDateTime fechaEnvio;
+    private LocalDate fechaEnvio;
     @Column(name = "EstadoInforme")
     private String estado;
     @ManyToOne(fetch = FetchType.EAGER)
@@ -77,11 +78,10 @@ public class Informe {
 		this.rutaDocumento = rutaDocumento;
 	}
 	
-	public Date getFechaEnvioDate() {
-	    return fechaEnvio != null ? java.sql.Timestamp.valueOf(fechaEnvio) : null;
+	public LocalDate getFechaEnvio() {
+		return fechaEnvio;
 	}
-	
-	public void setFechaEnvio(LocalDateTime fechaEnvio) {
+	public void setFechaEnvio(LocalDate fechaEnvio) {
 		this.fechaEnvio = fechaEnvio;
 	}
 	public String getEstado() {

@@ -158,9 +158,7 @@ if (usuario == null) {
 								            <td class="text-center fw-bold">${status.index + 1}</td>
 								            <td>${informe.asunto}</td>
 								            <td class="text-center"> ${informe.periodoPracticas}</td>
-								            <td class="text-center">
-								                <fmt:formatDate value="${informe.fechaEnvioDate}" pattern="dd/MM/yyyy"/>
-								            </td>
+                            				<td>${informe.fechaEnvio}</td>
 								            <td class="text-center">
 								                <c:choose>
 								                    <c:when test="${informe.estado == 'Aprobado'}">

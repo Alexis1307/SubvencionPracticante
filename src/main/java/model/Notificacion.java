@@ -1,7 +1,8 @@
 package model;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
+
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "Notificaciones")
@@ -19,7 +20,7 @@ public class Notificacion {
     private String mensaje;
 
     @Column(name = "Fecha")
-    private LocalDateTime fecha = LocalDateTime.now();
+    private LocalDate fecha;
 
     @Column(name = "Visto")
     private boolean visto = false;
@@ -48,11 +49,11 @@ public class Notificacion {
 		this.mensaje = mensaje;
 	}
 
-	public LocalDateTime getFecha() {
+	public LocalDate getFecha() {
 		return fecha;
 	}
 
-	public void setFecha(LocalDateTime fecha) {
+	public void setFecha(LocalDate fecha) {
 		this.fecha = fecha;
 	}
 

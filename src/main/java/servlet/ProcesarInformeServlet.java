@@ -10,7 +10,7 @@ import util.JpaUtil;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -88,7 +88,7 @@ public class ProcesarInformeServlet extends HttpServlet {
         flujo.setRolDestino(rolDestino);
         flujo.setEstado(accion.equalsIgnoreCase("aprobar") ? "Enviado" : "Rechazado");
         flujo.setComentario(comentario);
-        flujo.setFecha(LocalDateTime.now());
+        flujo.setFecha(LocalDate.now());
         flujoDAO.registrarFlujo(flujo);
 
         if ("aprobar".equalsIgnoreCase(accion)) {
@@ -98,7 +98,7 @@ public class ProcesarInformeServlet extends HttpServlet {
                     Notificacion noti = new Notificacion();
                     noti.setUsuario(rrhh);
                     noti.setMensaje("Nuevo informe aprobado por el Jefe de Unidad. Revisión pendiente.");
-                    noti.setFecha(LocalDateTime.now());
+                    noti.setFecha(LocalDate.now());
                     notificacionDAO.crearNotificacion(noti);
                 }
                 informeDAO.actualizarEstadoInforme(informeId, "En revisión");
@@ -111,7 +111,7 @@ public class ProcesarInformeServlet extends HttpServlet {
                     Notificacion noti = new Notificacion();
                     noti.setUsuario(practicante);
                     noti.setMensaje("Tu informe ha sido aprobado por RRHH.");
-                    noti.setFecha(LocalDateTime.now());
+                    noti.setFecha(LocalDate.now());
                     notificacionDAO.crearNotificacion(noti);
                 }
             }
@@ -125,7 +125,7 @@ public class ProcesarInformeServlet extends HttpServlet {
                     Notificacion noti = new Notificacion();
                     noti.setUsuario(destino);
                     noti.setMensaje("Informe rechazado. Observaciones: " + comentario);
-                    noti.setFecha(LocalDateTime.now());
+                    noti.setFecha(LocalDate.now());
                     notificacionDAO.crearNotificacion(noti);
                 }
             }
@@ -224,7 +224,7 @@ public class ProcesarInformeServlet extends HttpServlet {
         firma.setInforme(informe);
         firma.setUsuario(usuario);
         firma.setRutaImagenFirma(rutaFirma);
-        firma.setFecha(LocalDateTime.now());
+        firma.setFecha(LocalDate.now());
 
         boolean guardado = firmaDigitalDAO.guardarFirma(firma);
         if (!guardado) {

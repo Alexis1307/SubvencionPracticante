@@ -1,7 +1,8 @@
 package model;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
+
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "InformeFlujo")
@@ -33,7 +34,7 @@ public class InformeFlujo {
     private String comentario;
 
     @Column(name = "Fecha")
-    private LocalDateTime fecha;
+    private LocalDate fecha;
 
 
     public int getFlujoId() {
@@ -92,11 +93,11 @@ public class InformeFlujo {
         this.comentario = comentario;
     }
 
-    public LocalDateTime getFecha() {
+    public LocalDate getFecha() {
         return fecha;
     }
 
-    public void setFecha(LocalDateTime fecha) {
+    public void setFecha(LocalDate fecha) {
         this.fecha = fecha;
     }
 }
