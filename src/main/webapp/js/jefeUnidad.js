@@ -251,19 +251,31 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-function verDocumento(nombreArchivo) {
-    const modal = document.getElementById('modalDocumento');
-    const visor = document.getElementById('visorDocumento');
+function verDocumento(basePath, archivo, tipo) {
+        const url = `${basePath}/verInforme?archivo=${encodeURIComponent(archivo)}&tipo=${tipo}`;
+        const visor = document.getElementById('visorDocumento');
+        visor.src = url;
+        document.getElementById('modalDocumento').style.display = 'flex';
+    }
 
-    let ruta = `${contextPath}/verInforme?archivo=${encodeURIComponent(nombreArchivo)}`;
+    function mostrarModalFirma(informeId) {
+        document.getElementById('firma_informeId').value = informeId;
+        document.getElementById('modalFirma').style.display = 'flex';
+    }
 
-    visor.innerHTML = `<iframe src="${ruta}" style="width:100%; height:100%;" frameborder="0"></iframe>`;
+    function mostrarModalRechazo(informeId) {
+        document.getElementById('rechazo_informeId').value = informeId;
+        document.getElementById('modalRechazo').style.display = 'flex';
+    }
 
-    modal.style.display = 'flex';
-}
+    function cerrarModal(id) {
+        document.getElementById(id).style.display = 'none';
 
+        if (id === 'modalDocumento') {
+            document.getElementById('visorDocumento').src = '';
+        }
+    }
 
-function cerrarModal(idModal) {
-    const modal = document.getElementById(idModal);
-    if (modal) modal.style.display = 'none';
-}
+    function cerrarSesion() {
+        window.location.href = "<%= contextPath %>/logout";
+    }

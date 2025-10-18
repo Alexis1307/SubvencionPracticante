@@ -7,7 +7,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 
 import jakarta.servlet.ServletOutputStream;
@@ -15,48 +17,49 @@ import jakarta.servlet.ServletOutputStream;
 @WebServlet("/verInforme")
 public class VerInformeServlet extends HttpServlet {
 
-    private static final String BASE_PATH = "C:\\ProyectoSubvencionPDF";
+    private static final String RUTA_DOCS_JEFE = "C:\\ProyectoSubvencionPDF\\jefeUnidad\\";
+    private static final String RUTA_DOCS_PRACTICANTE = "C:\\ProyectoSubvencionPDF\\practicante\\";
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
-        // Obtener el nombre del archivo y el tipo
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String archivo = request.getParameter("archivo");
-        String tipo = request.getParameter("tipo"); // "firmado" o "practicante"
-
-        if (archivo == null || archivo.trim().isEmpty()) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Nombre de archivo no proporcionado");
+        String tipo = request.getParameter("tipo");
+        System.out.println("ruta mas tipo: " + archivo + tipo);
+        if (archivo == null || tipo == null) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Parámetros inválidos");
             return;
         }
 
-        // Determinar subcarpeta
-        String carpeta = "practicante";
+        String rutaBase;
         if ("firmado".equalsIgnoreCase(tipo)) {
-            carpeta = "jefeUnidad"; 
+            rutaBase = RUTA_DOCS_JEFE;
+        } else if ("practicante".equalsIgnoreCase(tipo)) {
+            rutaBase = RUTA_DOCS_PRACTICANTE;
+        } else {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Tipo de informe no válido");
+            return;
         }
 
-        // Construir la ruta completa del archivo
-        File pdf = new File(BASE_PATH + File.separator + carpeta, archivo);
-
-        System.out.println("Buscando archivo en: " + pdf.getAbsolutePath());
-
-        // Validar si el archivo existe
-        if (!pdf.exists() || !pdf.isFile()) {
+        File pdf = new File(rutaBase, archivo);
+        if (!pdf.exists() || pdf.isDirectory()) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "Archivo no encontrado");
             return;
         }
 
-        // Configurar la respuesta HTTP para servir el PDF
         response.setContentType("application/pdf");
         response.setHeader("Content-Disposition", "inline; filename=\"" + archivo + "\"");
 
-        // Copiar el archivo al response
-        try (ServletOutputStream out = response.getOutputStream()) {
-            Files.copy(pdf.toPath(), out);
-        } catch (IOException e) {
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error al leer el archivo PDF");
-            e.printStackTrace();
+        try (FileInputStream fis = new FileInputStream(pdf);
+             OutputStream os = response.getOutputStream()) {
+
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+
+            while ((bytesRead = fis.read(buffer)) != -1) {
+                os.write(buffer, 0, bytesRead);
+            }
+
+            os.flush();
         }
     }
 }

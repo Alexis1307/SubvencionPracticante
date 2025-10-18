@@ -11,6 +11,7 @@ import util.JpaUtil;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.List;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -44,22 +45,24 @@ public class ProcesarInformeServlet extends HttpServlet {
         int informeId = Integer.parseInt(request.getParameter("informeId"));
         String accion = request.getParameter("accion");
         String comentario = request.getParameter("comentario");
-
         String nombreUsuario = usuario.getNombreUsuario().toLowerCase();
 
-        // Validar credenciales si el jefeUnidad aprueba
+        // Si el Jefe de Unidad aprueba, requiere autenticación
         if ("aprobar".equalsIgnoreCase(accion) && "jefeunidad".equals(nombreUsuario)) {
             String usuarioInput = request.getParameter("usuario");
             String contrasenaInput = request.getParameter("contrasena");
 
             if (usuarioInput == null || contrasenaInput == null ||
-                !usuarioInput.equals("jefeUnidad") || !contrasenaInput.equals("123")) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write("Error: Credenciales inválidas. No se pudo insertar la firma digital.");
-                return;
+            	    !usuarioInput.equals("jefeUnidad") || !contrasenaInput.equals("123")) {
+
+            	    request.setAttribute("mensaje", "Credenciales inválidas. No se pudo insertar la firma digital.");
+            	    request.setAttribute("tipoMensaje", "error");
+            	    request.setAttribute("informes", informeDAO.obtenerInformesPorEstado("Pendiente"));
+            	    request.getRequestDispatcher("/jefeUnidad").forward(request, response);
+            	    return;
             }
 
-            // Intentar insertar firma
+            // Insertar firma
             try {
                 String nuevaRuta = insertarFirmaEnInforme(informeId, usuario.getUsuarioId());
                 guardarFirmaDigital(informeId, usuario.getUsuarioId(), nuevaRuta);
@@ -67,12 +70,10 @@ public class ProcesarInformeServlet extends HttpServlet {
             } catch (IOException e) {
                 e.printStackTrace();
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                response.getWriter().write("Error: No se pudo insertar la firma digital. Operación cancelada.");
+                response.getWriter().write("Error: No se pudo insertar la firma digital.");
                 return;
             }
         }
-
-        // Solo si llegamos aquí, continuamos con el flujo normal
 
         String rolOrigen = nombreUsuario;
         String rolDestino = determinarDestino(accion, rolOrigen);
@@ -91,6 +92,7 @@ public class ProcesarInformeServlet extends HttpServlet {
         flujo.setFecha(LocalDate.now());
         flujoDAO.registrarFlujo(flujo);
 
+        // Actualizar estado e insertar notificaciones
         if ("aprobar".equalsIgnoreCase(accion)) {
             if ("jefeunidad".equals(nombreUsuario)) {
                 Usuario rrhh = usuarioDAO.buscarPorNombre("rrhh");
@@ -102,7 +104,6 @@ public class ProcesarInformeServlet extends HttpServlet {
                     notificacionDAO.crearNotificacion(noti);
                 }
                 informeDAO.actualizarEstadoInforme(informeId, "En revisión");
-
             } else if ("rrhh".equals(nombreUsuario)) {
                 informeDAO.actualizarEstadoInforme(informeId, "Aprobado");
 
@@ -115,7 +116,6 @@ public class ProcesarInformeServlet extends HttpServlet {
                     notificacionDAO.crearNotificacion(noti);
                 }
             }
-
         } else if ("rechazar".equalsIgnoreCase(accion)) {
             informeDAO.actualizarEstadoInforme(informeId, "Rechazado");
 
@@ -131,80 +131,60 @@ public class ProcesarInformeServlet extends HttpServlet {
             }
         }
 
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.getWriter().write("Informe procesado correctamente.");
+        String mensaje = "Informe procesado correctamente.";
+        String tipoMensaje = "success";
+
+        request.setAttribute("mensaje", mensaje);
+        request.setAttribute("tipoMensaje", tipoMensaje);
+        request.setAttribute("informeIdProcesado", informeId);
+
+        List<Informe> informes = informeDAO.obtenerInformesPorEstado("Pendiente");
+        request.setAttribute("informes", informes);
+
+	    request.getRequestDispatcher("/jefeUnidad").forward(request, response);
     }
 
     private String determinarDestino(String accion, String rolOrigen) {
         if ("aprobar".equalsIgnoreCase(accion)) {
-            if ("jefeunidad".equalsIgnoreCase(rolOrigen)) {
-                return "rrhh";
-            } else if ("rrhh".equalsIgnoreCase(rolOrigen)) {
-                return null; // no hay siguiente destino
-            }
+            if ("jefeunidad".equalsIgnoreCase(rolOrigen)) return "rrhh";
+            if ("rrhh".equalsIgnoreCase(rolOrigen)) return null;
         } else {
-            if ("rrhh".equalsIgnoreCase(rolOrigen)) {
-                return "jefeunidad";
-            } else if ("jefeunidad".equalsIgnoreCase(rolOrigen)) {
-                return "practicante";
-            }
+            if ("rrhh".equalsIgnoreCase(rolOrigen)) return "jefeunidad";
+            if ("jefeunidad".equalsIgnoreCase(rolOrigen)) return "practicante";
         }
         return null;
     }
 
     private String insertarFirmaEnInforme(int informeId, int usuarioId) throws IOException {
-        // Obtener la ruta del informe desde la base de datos
         Informe informe = informeDAO.obtenerInformePorId(informeId);
-        if (informe == null) {
-            throw new IOException("No se encontró el informe en la base de datos con ID: " + informeId);
-        }
+        if (informe == null) throw new IOException("Informe no encontrado ID: " + informeId);
 
         String rutaPDFOriginal = informe.getRutaDocumento();
-        if (rutaPDFOriginal == null || rutaPDFOriginal.isEmpty()) {
-            throw new IOException("La ruta del informe está vacía para el ID: " + informeId);
-        }
+        if (rutaPDFOriginal == null || rutaPDFOriginal.isEmpty())
+            throw new IOException("Ruta del informe vacía para ID: " + informeId);
 
-        // Crear nueva ruta para el documento firmado en la carpeta del jefe de unidad
-        String nombreArchivo = new File(rutaPDFOriginal).getName(); // Mantener nombre original
+        String nombreArchivo = new File(rutaPDFOriginal).getName();
         String nuevaRutaPDF = RUTA_DOCS_JEFE + nombreArchivo.replace(".pdf", "_firmado.pdf");
 
-        // Verificar que el archivo original exista
         File archivoOriginal = new File(rutaPDFOriginal);
-        if (!archivoOriginal.exists()) {
-            throw new IOException("Archivo original no encontrado: " + rutaPDFOriginal);
-        }
+        if (!archivoOriginal.exists()) throw new IOException("Archivo no encontrado: " + rutaPDFOriginal);
 
-        // Crear carpeta de destino si no existe
         File carpetaDestino = new File(RUTA_DOCS_JEFE);
-        if (!carpetaDestino.exists()) {
-            boolean creada = carpetaDestino.mkdirs();
-            if (!creada) {
-                throw new IOException("No se pudo crear la carpeta de destino: " + RUTA_DOCS_JEFE);
-            }
-        }
+        if (!carpetaDestino.exists() && !carpetaDestino.mkdirs())
+            throw new IOException("No se pudo crear la carpeta: " + RUTA_DOCS_JEFE);
 
-        // Cargar y agregar firma al documento
         PDDocument documento = PDDocument.load(archivoOriginal);
         try {
             var pagina = documento.getPage(0);
             PDImageXObject imagenFirma = PDImageXObject.createFromFile(RUTA_FIRMA, documento);
-
             PDPageContentStream contenido = new PDPageContentStream(
-                documento,
-                pagina,
-                PDPageContentStream.AppendMode.APPEND,
-                true
-            );
+                documento, pagina, PDPageContentStream.AppendMode.APPEND, true);
 
-            float x = 400;
-            float y = 100;
-            float ancho = 150;
-            float alto = 50;
-
+            float x = 400, y = 100, ancho = 150, alto = 50;
             contenido.drawImage(imagenFirma, x, y, ancho, alto);
             contenido.close();
 
-            documento.save(nuevaRutaPDF); 
+            documento.save(nuevaRutaPDF);
         } finally {
             documento.close();
         }
@@ -212,12 +192,10 @@ public class ProcesarInformeServlet extends HttpServlet {
         return nuevaRutaPDF;
     }
 
-
     private void guardarFirmaDigital(int informeId, int usuarioId, String rutaFirma) {
         FirmaDigital firma = new FirmaDigital();
         Informe informe = new Informe();
         informe.setInformeID(informeId);
-
         Usuario usuario = new Usuario();
         usuario.setUsuarioId(usuarioId);
 
@@ -226,9 +204,8 @@ public class ProcesarInformeServlet extends HttpServlet {
         firma.setRutaImagenFirma(rutaFirma);
         firma.setFecha(LocalDate.now());
 
-        boolean guardado = firmaDigitalDAO.guardarFirma(firma);
-        if (!guardado) {
-            System.err.println("Error guardando la firma digital en BD.");
+        if (!firmaDigitalDAO.guardarFirma(firma)) {
+            System.out.println("Error guardando la firma digital en BD.");
         }
     }
 

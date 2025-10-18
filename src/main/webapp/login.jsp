@@ -5,7 +5,7 @@ String mensaje = (String) request.getAttribute("mensaje");
 
 HttpSession sesion = request.getSession(false);
 if (sesion != null && sesion.getAttribute("usuarioLogueado") != null) {
-    response.sendRedirect(request.getContextPath() + "/dashboard");
+    response.sendRedirect(request.getContextPath() + "/login");
     return;
 }
 %>

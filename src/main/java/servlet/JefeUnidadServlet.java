@@ -45,13 +45,18 @@ public class JefeUnidadServlet extends HttpServlet {
 
         List<Informe> informesPendientes = informeDAO.obtenerInformesPendientes();
         
-        System.out.println("Total informes: " + informesPendientes.size());
-        for (Informe i : informesPendientes) {
-            System.out.println("Informe ID: " + i.getInformeID() + ", Usuario: " + i.getPracticante());
+        for (Informe inf : informesPendientes) {
+            System.out.println("Informe ID " + inf.getInformeID() + " nombreDocumento = " + inf.getNombreDocumento());
         }
 
         request.setAttribute("informes", informesPendientes);
         request.getRequestDispatcher("views/jefeUnidad.jsp").forward(request, response);
+    }
+    
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        doGet(request, response); // Reutilizamos la lógica del GET
     }
 }
 

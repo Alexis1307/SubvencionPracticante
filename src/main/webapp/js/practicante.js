@@ -318,6 +318,7 @@ function verDocumento(basePath, archivo, tipo) {
     const visor = document.getElementById('visorDocumento');
     visor.innerHTML = `<iframe src="${url}" width="100%" height="100%"></iframe>`;
     document.getElementById('modalDocumento').style.display = 'block';
+	console.log()
 }
 
 

@@ -11,6 +11,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.Persistence;
+import jakarta.persistence.TypedQuery;
 import model.Informe;
 
 public class InformeDAO {
@@ -130,5 +131,13 @@ public class InformeDAO {
 		    } finally {
 		        em.close();
 		    }
-		}
+	 }
+	 
+	 public List<Informe> obtenerInformesPorEstado(String estado) {
+		    EntityManager em = emf.createEntityManager();
+	        String jpql = "SELECT i FROM Informe i WHERE i.estado = :estado ORDER BY i.fechaEnvio DESC";
+	        TypedQuery<Informe> query = em.createQuery(jpql, Informe.class);
+	        query.setParameter("estado", estado);
+	        return query.getResultList();
+	    }
 }

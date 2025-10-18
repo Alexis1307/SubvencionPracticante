@@ -235,17 +235,19 @@ if (usuario == null) {
         </div>
     </footer>
     
-    <div id="modalDocumento" style="display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); z-index: 1050;">
-	    <div class="modal-content bg-white shadow rounded p-3" style="width: 80%; height: 90%; position: relative;">
-	        <button type="button" class="btn-close position-absolute top-0 end-0 m-3" aria-label="Cerrar" onclick="cerrarModal('modalDocumento')"></button>
-	        <div id="visorDocumento" style="width: 100%; height: 100%;"></div>
-	    </div>
+    <div id="modalDocumento" class="modal" style="display:none;">
+	    <div class="modal-contenido modal-documento">
+	        <h3>Visualización del informe</h3>
+	        <div id="visorDocumento" style="height:500px;"></div>
+	        <div id="botonesModalDocumento" style="margin-top: 10px;">
+	            <button onclick="cerrarModal('modalDocumento')" class="btn-cerrar">
+	                Cerrar
+	            </button>
+	        </div>
+		</div>
 	</div>
-
     
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- <script src="${pageContext.request.contextPath}/js/practicante.js"></script> -->
     <script>const contextPath = '<%= request.getContextPath() %>';</script>
 	<script type="text/javascript" src="${pageContext.request.contextPath}/js/practicante.js"></script>
 </body>
