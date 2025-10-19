@@ -279,3 +279,8 @@ function verDocumento(basePath, archivo, tipo) {
     function cerrarSesion() {
         window.location.href = "<%= contextPath %>/logout";
     }
+	
+	function verDocumentoURL(url) {
+	    document.getElementById("visorDocumento").src = url;
+	    document.getElementById("modalDocumento").style.display = "block";
+	}

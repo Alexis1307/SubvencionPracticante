@@ -98,8 +98,7 @@
                             badgeClass = "badge bg-danger";
                         }
 
-                        // Si el informe fue procesado (aprobado o rechazado), deshabilitar botones Aprobar y Rechazar
-                        boolean deshabilitarBotones = (informeIdProcesado != null && informeIdProcesado.equals(informe.getInformeID()));
+						boolean deshabilitarBotones = !"Pendiente".equalsIgnoreCase(informe.getEstado());
             %>
             <tr>
                 <td>
@@ -114,8 +113,8 @@
                 <td>
                     <div class="btn-group" role="group" aria-label="Acciones">
                         <button type="button" class="btn btn-outline-primary btn-action"
-                            onclick="verDocumento('<%= contextPath %>', '<%= nombreArchivo %>', 'practicante')">
-                            Ver
+                            onclick="verDocumentoURL('<%= contextPath %>/verDocumento?nombre=<%= nombreArchivo %>')">
+                            Ver Informe
                         </button>
                         <button type="button" class="btn btn-outline-primary btn-action"
                             onclick="mostrarModalFirma(<%= informe.getInformeID() %>)"
