@@ -11,6 +11,7 @@ import util.JpaUtil;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -33,7 +34,6 @@ public class ProcesarInformeServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
         HttpSession session = request.getSession(false);
         Usuario usuario = (session != null) ? (Usuario) session.getAttribute("usuarioLogueado") : null;
 
@@ -42,7 +42,13 @@ public class ProcesarInformeServlet extends HttpServlet {
             return;
         }
 
-        int informeId = Integer.parseInt(request.getParameter("informeId"));
+        String idStr = request.getParameter("informeId");
+        if (idStr == null || idStr.trim().isEmpty()) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "El ID del informe es obligatorio.");
+            return;
+        }
+
+        int informeId = Integer.parseInt(idStr);
         String accion = request.getParameter("accion");
         String comentario = request.getParameter("comentario");
         String nombreUsuario = usuario.getNombreUsuario().toLowerCase();
@@ -53,13 +59,22 @@ public class ProcesarInformeServlet extends HttpServlet {
             String contrasenaInput = request.getParameter("contrasena");
 
             if (usuarioInput == null || contrasenaInput == null ||
-            	    !usuarioInput.equals("jefeUnidad") || !contrasenaInput.equals("123")) {
+                !usuarioInput.equals("jefeUnidad") || !contrasenaInput.equals("123")) {
 
-            	    request.setAttribute("mensaje", "Credenciales inválidas. No se pudo insertar la firma digital.");
-            	    request.setAttribute("tipoMensaje", "error");
-            	    request.setAttribute("informes", informeDAO.obtenerInformesPorEstado("Pendiente"));
-            	    request.getRequestDispatcher("/jefeUnidad").forward(request, response);
-            	    return;
+                request.setAttribute("mensaje", "Credenciales inválidas. No se pudo insertar la firma digital.");
+                request.setAttribute("tipoMensaje", "error");
+
+                // JefeUnidad ve todos los informes
+                List<Informe> informes = informeDAO.obtenerTodosLosInformes();
+                request.setAttribute("informes", informes);
+
+                if ("rrhh".equals(nombreUsuario)) {
+                    request.getRequestDispatcher("/rrhh.jsp").forward(request, response);
+                } else {
+                    request.getRequestDispatcher("/jefeUnidad.jsp").forward(request, response);
+                }
+
+                return;
             }
 
             // Insertar firma
@@ -81,16 +96,20 @@ public class ProcesarInformeServlet extends HttpServlet {
         Informe informe = new Informe();
         informe.setInformeID(informeId);
 
-        // Registrar flujo del informe
+        // Registrar flujo solo si aprueba o rechaza
         InformeFlujo flujo = new InformeFlujo();
         flujo.setInforme(informe);
         flujo.setUsuario(usuario);
         flujo.setRolOrigen(rolOrigen);
         flujo.setRolDestino(rolDestino);
-        flujo.setEstado(accion.equalsIgnoreCase("aprobar") ? "Enviado" : "Rechazado");
+        flujo.setEstado(accion.equalsIgnoreCase("aprobar") ? "En revision" : "Rechazado");
         flujo.setComentario(comentario);
         flujo.setFecha(LocalDate.now());
         flujoDAO.registrarFlujo(flujo);
+
+        // Actualiza el flujo anterior (el activo)
+        String nuevoEstadoFlujo = accion.equalsIgnoreCase("aprobar") ? "Aprobado" : "Rechazado";
+        flujoDAO.actualizarEstadoFlujoPorInforme(informeId, nuevoEstadoFlujo);
 
         // Actualizar estado e insertar notificaciones
         if ("aprobar".equalsIgnoreCase(accion)) {
@@ -103,7 +122,7 @@ public class ProcesarInformeServlet extends HttpServlet {
                     noti.setFecha(LocalDate.now());
                     notificacionDAO.crearNotificacion(noti);
                 }
-                informeDAO.actualizarEstadoInforme(informeId, "En revisión");
+                informeDAO.actualizarEstadoInforme(informeId, "En revision");
             } else if ("rrhh".equals(nombreUsuario)) {
                 informeDAO.actualizarEstadoInforme(informeId, "Aprobado");
 
@@ -114,6 +133,15 @@ public class ProcesarInformeServlet extends HttpServlet {
                     noti.setMensaje("Tu informe ha sido aprobado por RRHH.");
                     noti.setFecha(LocalDate.now());
                     notificacionDAO.crearNotificacion(noti);
+                }
+                
+                Usuario especialista = usuarioDAO.buscarPorNombre("especialista");
+                if (especialista != null) {
+                    Notificacion notiEsp = new Notificacion();
+                    notiEsp.setUsuario(especialista);
+                    notiEsp.setMensaje("Nuevo informe recibido desde RRHH.");
+                    notiEsp.setFecha(LocalDate.now());
+                    notificacionDAO.crearNotificacion(notiEsp);
                 }
             }
         } else if ("rechazar".equalsIgnoreCase(accion)) {
@@ -131,17 +159,31 @@ public class ProcesarInformeServlet extends HttpServlet {
             }
         }
 
-        String mensaje = "Informe procesado correctamente.";
-        String tipoMensaje = "success";
-
-        request.setAttribute("mensaje", mensaje);
-        request.setAttribute("tipoMensaje", tipoMensaje);
+        // Mensaje de éxito
+        request.setAttribute("mensaje", "Informe procesado correctamente.");
+        request.setAttribute("tipoMensaje", "success");
         request.setAttribute("informeIdProcesado", informeId);
 
-        List<Informe> informes = informeDAO.obtenerInformesPorEstado("Pendiente");
-        request.setAttribute("informes", informes);
+        // Mostrar los informes dependiendo del rol
+        List<Informe> informes;
+        if ("jefeunidad".equals(nombreUsuario)) {
+            informes = informeDAO.obtenerTodosLosInformes();
+        } else if ("rrhh".equals(nombreUsuario)) {
+            informes = informeDAO.obtenerInformesPorEstados(Arrays.asList("En revision", "Aprobado", "Rechazado"));
+        } else {
+            informes = List.of(); // Otros roles no tienen informes visibles
+        }
 
-	    request.getRequestDispatcher("/jefeUnidad").forward(request, response);
+        request.setAttribute("informes", informes);
+        
+        if ("jefeunidad".equals(nombreUsuario)) {
+            response.sendRedirect(request.getContextPath() + "/jefeUnidad");
+
+        } else if ("rrhh".equals(nombreUsuario)) {
+        	session.setAttribute("mensaje", "Informe procesado correctamente.");
+        	session.setAttribute("tipoMensaje", "success");
+            response.sendRedirect(request.getContextPath() + "/rrhh");
+        }    
     }
 
     private String determinarDestino(String accion, String rolOrigen) {
@@ -196,11 +238,11 @@ public class ProcesarInformeServlet extends HttpServlet {
         FirmaDigital firma = new FirmaDigital();
         Informe informe = new Informe();
         informe.setInformeID(informeId);
-        Usuario usuario = new Usuario();
-        usuario.setUsuarioId(usuarioId);
+        Usuario user = new Usuario();
+        user.setUsuarioId(usuarioId);
 
         firma.setInforme(informe);
-        firma.setUsuario(usuario);
+        firma.setUsuario(user);
         firma.setRutaImagenFirma(rutaFirma);
         firma.setFecha(LocalDate.now());
 

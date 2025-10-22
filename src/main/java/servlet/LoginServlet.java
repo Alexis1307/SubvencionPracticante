@@ -38,6 +38,7 @@ public class LoginServlet extends HttpServlet {
 			
 			if(usuario != null && usuario.getContra().equals(contra)) {
 				request.getSession().setAttribute("usuarioLogueado", usuario);
+				request.getSession().setAttribute("nombreUsuario", usuario.getNombreUsuario());
 				switch (usuario.getNombreUsuario()) {
 					case "practicante": 
 						response.sendRedirect(request.getContextPath() + "/practicante");
@@ -68,5 +69,12 @@ public class LoginServlet extends HttpServlet {
 	        request.getRequestDispatcher("login.jsp").forward(request, response);
 		}
 	}
+	
+	@Override
+	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+	        throws ServletException, IOException {
+	    request.getRequestDispatcher("login.jsp").forward(request, response);
+	}
+
 
 }

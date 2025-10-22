@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.Informe;
+import model.Notificacion;
 import model.Usuario;
 
 import java.io.IOException;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import dao.InformeDAO;
+import dao.NotificacionDAO;
 import dao.RolDAO;
 
 
@@ -57,6 +59,9 @@ public class PracticanteServlet extends HttpServlet {
                 case "Rechazado" -> rechazados++;
             }
         }
+        
+        List<Notificacion> notificaciones = NotificacionDAO.obtenerPorUsuario(usuario.getUsuarioId());
+        request.setAttribute("notificaciones", notificaciones);
         
         request.setAttribute("pendientes", pendientes);
         request.setAttribute("aprobados", aprobados);

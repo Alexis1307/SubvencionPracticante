@@ -22,7 +22,7 @@ if (usuario == null) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/practicante.css">
 </head>
-<body>
+<body data-context-path="${pageContext.request.contextPath}">
     <nav class="navbar navbar-expand-lg navbar-dark bg-gradient-primary shadow-sm sticky-top">
         <div class="container-fluid">
             <a class="navbar-brand d-flex align-items-center" href="${pageContext.request.contextPath}/panel">
@@ -33,6 +33,24 @@ if (usuario == null) {
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
                 <span class="navbar-toggler-icon"></span>
             </button>
+            
+            <div class="dropdown">
+			  <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+			    🔔 Notificaciones
+			  </button>
+			  <ul class="dropdown-menu dropdown-menu-end">
+			    <c:forEach var="noti" items="${notificaciones}">
+			      <li class="dropdown-item">
+			        <strong>${noti.mensaje}</strong><br />
+			        <small class="text-muted">${noti.fecha}</small>
+			      </li>
+			    </c:forEach>
+			    <c:if test="${empty notificaciones}">
+			      <li class="dropdown-item text-muted">No hay notificaciones</li>
+			    </c:if>
+			  </ul>
+			</div>
+            
 
             <div class="collapse navbar-collapse" id="navbarContent">
                 <ul class="navbar-nav ms-auto align-items-lg-center gap-3">
@@ -176,21 +194,12 @@ if (usuario == null) {
 								                </c:choose>
 								            </td>
 								            <td class="text-center">
-											    <div class="btn-group btn-group-sm" role="group">
-											        <c:choose>
-													    <c:when test="${informe.estado == 'Aprobado'}">
-													        <button class="btn btn-outline-primary"
-													            onclick="verDocumento('${pageContext.request.contextPath}', '${informe.nombreDocumento}', 'firmado')">
-													            <i class="fas fa-eye"></i>
-													        </button>
-													    </c:when>
-													    <c:otherwise>
-													        <button class="btn btn-outline-primary"
-													            onclick="verDocumento('${pageContext.request.contextPath}', '${informe.nombreDocumento}', 'practicante')">
-													            <i class="fas fa-eye"></i>
-													        </button>
-													    </c:otherwise>
-													</c:choose>					
+											    <div class="btn-group btn-group-sm" role="group">	
+														<button class="btn btn-outline-primary"
+														        onclick="verDocumento(${informe.informeID})">
+														    <i class="fas fa-eye"></i> Ver Informe
+														</button>
+								                
 											        <a href="${pageContext.request.contextPath}/archivos/${informe.rutaDocumento}"
 											           class="btn btn-outline-secondary"
 											           download
@@ -235,20 +244,25 @@ if (usuario == null) {
         </div>
     </footer>
     
-    <div id="modalDocumento" class="modal" style="display:none;">
-	    <div class="modal-contenido modal-documento">
-	        <h3>Visualización del informe</h3>
-	        <div id="visorDocumento" style="height:500px;"></div>
-	        <div id="botonesModalDocumento" style="margin-top: 10px;">
-	            <button onclick="cerrarModal('modalDocumento')" class="btn-cerrar">
-	                Cerrar
-	            </button>
-	        </div>
-		</div>
+    <!-- Modal para Ver Informe PDF -->
+	<div class="modal fade" id="modalVerInforme" tabindex="-1" aria-labelledby="modalVerInformeLabel" aria-hidden="true">
+	  <div class="modal-dialog modal-xl modal-dialog-centered">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="modalVerInformeLabel">Visualizar Informe</h5>
+	        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+	      </div>
+	      <div class="modal-body">
+	        <iframe id="iframeInforme" src="" width="100%" height="600px" style="border:none;"></iframe>
+	      </div>
+	    </div>
+	  </div>
 	</div>
+
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>const contextPath = '<%= request.getContextPath() %>';</script>
 	<script type="text/javascript" src="${pageContext.request.contextPath}/js/practicante.js"></script>
+	<script src="${pageContext.request.contextPath}/js/documento.js"></script>
 </body>
 </html>

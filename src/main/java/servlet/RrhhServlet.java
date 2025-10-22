@@ -2,6 +2,7 @@ package servlet;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.List;
 
 import dao.InformeDAO;
 import dao.InformeFlujoDAO;
@@ -22,100 +23,47 @@ import model.Usuario;
 @WebServlet("/rrhh")
 public class RrhhServlet extends HttpServlet {
 
-    private InformeDAO informeDAO = new InformeDAO();
-    private InformeFlujoDAO flujoDAO = new InformeFlujoDAO();
-    private UsuarioDAO usuarioDAO = new UsuarioDAO(Persistence.createEntityManagerFactory("sqlserver"));
-    private NotificacionDAO notificacionDAO = new NotificacionDAO();
+    private final InformeDAO informeDAO = new InformeDAO();
+    private final NotificacionDAO notificacionDAO = new NotificacionDAO();
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
         HttpSession session = request.getSession(false);
-        Usuario usuario = (session != null) ? (Usuario) session.getAttribute("usuarioLogueado") : null;
 
-        if (usuario == null || !"rrhh".equalsIgnoreCase(usuario.getNombreUsuario())) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Acceso denegado");
+        if (session == null || session.getAttribute("usuarioLogueado") == null) {
+            response.sendRedirect(request.getContextPath() + "/login.jsp");
             return;
         }
 
-        int informeId = Integer.parseInt(request.getParameter("informeId"));
-        String accion = request.getParameter("accion"); 
-        String comentario = request.getParameter("comentario");
+        Usuario usuario = (Usuario) session.getAttribute("usuarioLogueado");
 
-        Informe informe = informeDAO.obtenerInformePorId(informeId);
-        if (informe == null) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Informe no encontrado");
+        if (!usuario.esRrhh()) {
+            response.sendRedirect(request.getContextPath() + "/login.jsp");
             return;
         }
 
-        try {
-            if ("aprobar".equalsIgnoreCase(accion)) {
-                // Cambiar estado informe a aprobado
-                informeDAO.actualizarEstadoInforme(informeId, "Aprobado");
+        List<String> estadosDeseados = List.of("En revision", "Aprobado", "Rechazado");
+        List<Informe> informes = informeDAO.obtenerInformesPorEstados(estadosDeseados);
 
-                // Registrar flujo de aprobación
-                InformeFlujo flujo = new InformeFlujo();
-                flujo.setInforme(informe);
-                flujo.setUsuario(usuario);
-                flujo.setRolOrigen("rrhh");
-                flujo.setRolDestino(null); 
-                flujo.setEstado("Aprobado");
-                flujo.setComentario(comentario);
-                flujo.setFecha(LocalDate.now());
-                flujoDAO.registrarFlujo(flujo);
+        List<Notificacion> notificaciones = notificacionDAO.obtenerPorUsuario(usuario.getUsuarioId());
 
-                // Notificar a practicante
-                Usuario practicante = informe.getPracticante();
-                if (practicante != null) {
-                    Notificacion noti = new Notificacion();
-                    noti.setUsuario(practicante);
-                    noti.setMensaje("Tu informe ha sido aprobado por RRHH.");
-                    noti.setFecha(LocalDate.now());
-                    notificacionDAO.crearNotificacion(noti);
-                }
-
-            } else if ("rechazar".equalsIgnoreCase(accion)) {
-                // Cambiar estado informe a rechazado
-                informeDAO.actualizarEstadoInforme(informeId, "Rechazado");
-
-                // Registrar flujo de rechazo a jefeUnidad con comentario
-                Usuario jefeUnidad = usuarioDAO.buscarPorNombre("jefeunidad");
-
-                InformeFlujo flujo = new InformeFlujo();
-                flujo.setInforme(informe);
-                flujo.setUsuario(usuario);
-                flujo.setRolOrigen("rrhh");
-                flujo.setRolDestino("jefeunidad");
-                flujo.setEstado("Rechazado");
-                flujo.setComentario(comentario);
-                flujo.setFecha(LocalDate.now());
-                flujoDAO.registrarFlujo(flujo);
-
-                // Notificar a jefeUnidad para revisión
-                if (jefeUnidad != null) {
-                    Notificacion noti = new Notificacion();
-                    noti.setUsuario(jefeUnidad);
-                    noti.setMensaje("Informe rechazado por RRHH. Observaciones: " + comentario);
-                    noti.setFecha(LocalDate.now());
-                    notificacionDAO.crearNotificacion(noti);
-                }
-
-            } else {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Acción inválida");
-                return;
-            }
-
-            response.setStatus(HttpServletResponse.SC_OK);
-            response.getWriter().write("Informe procesado correctamente.");
-
-        } catch (Exception e) {
-        	System.out.println("ERROR PE CUASA ARREGLA");
-            e.printStackTrace();
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error al procesar el informe");
+        System.out.println("Cantidad de informes traídos: " + informes.size());
+        for (Informe i : informes) {
+            System.out.println(i.getInformeID() + " - " + i.getEstado());
         }
-    }
-    
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+        
+        request.setAttribute("informes", informes);
+        request.setAttribute("notificaciones", notificaciones);
         request.getRequestDispatcher("views/rrhh.jsp").forward(request, response);
+        
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        doGet(request, response);
     }
 }

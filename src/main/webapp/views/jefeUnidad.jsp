@@ -1,76 +1,83 @@
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
-<%@ page import="java.util.*, model.Informe" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ page import="model.Informe" %>
 <%@ page import="model.Usuario" %>
-<%
-    HttpSession sesion = request.getSession(false);
-    Usuario usuario = (Usuario) sesion.getAttribute("usuarioLogueado");
 
-    if (usuario == null || !usuario.esJefeUnidad()) {
-        response.sendRedirect("../login.jsp");
-        return;
-    }
+<c:choose>
+    <c:when test="${sessionScope.usuarioLogueado == null or not sessionScope.usuarioLogueado.esJefeUnidad()}">
+        <c:redirect url="../login.jsp" />
+    </c:when>
+</c:choose>
 
-    List<Informe> informes = (List<Informe>) request.getAttribute("informes");
-    String contextPath = request.getContextPath();
-
-    // Mensajes recibidos de la acción procesarInforme
-    String mensaje = (String) request.getAttribute("mensaje");
-    String tipoMensaje = (String) request.getAttribute("tipoMensaje"); // success, error, warning
-    Integer informeIdProcesado = (Integer) request.getAttribute("informeIdProcesado");
-%>
+<c:set var="usuario" value="${sessionScope.usuarioLogueado}" />
+<c:set var="informes" value="${requestScope.informes}" />
+<c:set var="mensaje" value="${requestScope.mensaje}" />
+<c:set var="tipoMensaje" value="${requestScope.tipoMensaje}" />
+<c:set var="contextPath" value="${pageContext.request.contextPath}" />
 
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8" />
     <title>Panel Jefe de Unidad</title>
-    <link rel="stylesheet" href="<%= contextPath %>/css/jefeUnidad.css" />
+    <link rel="stylesheet" href="${contextPath}/css/jefeUnidad.css" />
 </head>
-<body>
+<body data-context-path="${contextPath}">
 
 <nav class="navbar">
     <div class="navbar-left">
         <a href="#inicio">Inicio</a>
     </div>
-	<form action="${pageContext.request.contextPath}/logout" method="post" class="d-inline">
-     	<button type="submit" class="btn btn-light btn-sm" id="logoutBtn">
-            <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
-        </button>
-    </form></nav>
+
+    <!-- Aquí podrías poner el dropdown de notificaciones si ya se pasan como atributo -->
+    <div class="navbar-right d-flex align-items-center">
+        <div class="dropdown ms-auto">
+            <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                🔔 Notificaciones
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <c:forEach var="noti" items="${requestScope.notificaciones}">
+                    <li class="dropdown-item">
+                        <strong>${noti.mensaje}</strong><br/>
+                        <small class="text-muted">${noti.fecha}</small>
+                    </li>
+                </c:forEach>
+                <c:if test="${empty requestScope.notificaciones}">
+                    <li class="dropdown-item text-muted">No hay notificaciones</li>
+                </c:if>
+            </ul>
+        </div>
+
+        <form action="${contextPath}/logout" method="post" class="d-inline ms-3">
+            <button type="submit" class="btn btn-light btn-sm" id="logoutBtn">
+                <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+            </button>
+        </form>
+    </div>
+</nav>
 
 <section id="inicio" class="container mt-4">
-    <h1 class="fw-bold">Bienvenido, <%= usuario.getNombreUsuario() %></h1>
+    <h1 class="fw-bold">Bienvenido, ${usuario.nombreUsuario}</h1>
     <h2 class="fw-bold">Informes en revisión</h2>
 
-    <%-- Mostrar mensaje si existe --%>
-    <%
-        if (mensaje != null && !mensaje.trim().isEmpty()) {
-            String claseMensaje = "notification-alert bg-info"; // Default info azul
-            if ("success".equalsIgnoreCase(tipoMensaje)) {
-                claseMensaje = "notification-alert bg-success";
-            } else if ("error".equalsIgnoreCase(tipoMensaje)) {
-                claseMensaje = "notification-alert bg-danger";
-            } else if ("warning".equalsIgnoreCase(tipoMensaje)) {
-                claseMensaje = "notification-alert bg-warning";
-            }
-    %>
-        <div class="<%= claseMensaje %>" role="alert" style="padding: 15px; border-radius: 6px; color: white; margin-bottom: 20px;">
-            <%= mensaje %>
+    <c:if test="${not empty mensaje}">
+        <c:set var="claseMensaje" value="notification-alert bg-info" />
+        <c:choose>
+            <c:when test="${tipoMensaje == 'success'}">
+                <c:set var="claseMensaje" value="notification-alert bg-success" />
+            </c:when>
+            <c:when test="${tipoMensaje == 'error'}">
+                <c:set var="claseMensaje" value="notification-alert bg-danger" />
+            </c:when>
+            <c:when test="${tipoMensaje == 'warning'}">
+                <c:set var="claseMensaje" value="notification-alert bg-warning" />
+            </c:when>
+        </c:choose>
+        <div class="${claseMensaje}" role="alert" style="padding:15px;border-radius:6px;color:white;margin-bottom:20px;">
+            ${mensaje}
         </div>
-    <% } %>
-    
-	   <% if (mensaje != null && !mensaje.trim().isEmpty()) { 
-		    String claseMensaje = "alert-info";
-		    if ("success".equalsIgnoreCase(tipoMensaje)) {
-		        claseMensaje = "alert-success";
-		    } else if ("error".equalsIgnoreCase(tipoMensaje)) {
-		        claseMensaje = "alert-danger";
-		    } else if ("warning".equalsIgnoreCase(tipoMensaje)) {
-		        claseMensaje = "alert-warning";
-		    }
-		%>
-   	 <div class="alert <%= claseMensaje %>"><%= mensaje %></div>
-	<% } %>
+    </c:if>
 
     <table class="table">
         <thead>
@@ -83,69 +90,79 @@
             </tr>
         </thead>
         <tbody>
-            <%
-                if (informes != null && !informes.isEmpty()) {
-                    for (Informe informe : informes) {
-                        String nombreArchivo = new java.io.File(informe.getRutaDocumento()).getName();
-                        String estado = informe.getEstado();
-                        String badgeClass = "badge bg-secondary";
+            <c:choose>
+                <c:when test="${not empty informes}">
+                    <c:forEach var="informe" items="${informes}">
+                        <c:set var="nombreArchivo" value="${fn:split(informe.rutaDocumento, '/')[fn:length(fn:split(informe.rutaDocumento, '/')) - 1]}" />
+                        <c:set var="estadoInf" value="${informe.estado}" />
+                        <c:set var="badgeClass" value="badge bg-secondary" />
+                        <c:choose>
+                            <c:when test="${estadoInf eq 'Pendiente'}">
+                                <c:set var="badgeClass" value="badge bg-warning" />
+                            </c:when>
+                            <c:when test="${estadoInf eq 'Aprobado'}">
+                                <c:set var="badgeClass" value="badge bg-success" />
+                            </c:when>
+                            <c:when test="${estadoInf eq 'Rechazado'}">
+                                <c:set var="badgeClass" value="badge bg-danger" />
+                            </c:when>
+                        </c:choose>
+                        <c:set var="deshabilitarBotones" value="${not (estadoInf eq 'Pendiente')}" />
 
-                        if ("Pendiente".equalsIgnoreCase(estado)) {
-                            badgeClass = "badge bg-warning";
-                        } else if ("Aprobado".equalsIgnoreCase(estado)) {
-                            badgeClass = "badge bg-success";
-                        } else if ("Rechazado".equalsIgnoreCase(estado)) {
-                            badgeClass = "badge bg-danger";
-                        }
-
-						boolean deshabilitarBotones = !"Pendiente".equalsIgnoreCase(informe.getEstado());
-            %>
-            <tr>
-                <td>
-                    <span class="archivo-link text-primary" style="cursor:pointer;"
-                          onclick="verDocumento('<%= contextPath %>', '<%= nombreArchivo %>', 'practicante')">
-                        <%= nombreArchivo %>
-                    </span>
-                </td>
-                <td><%= informe.getFechaEnvio() %></td>
-                <td><%= informe.getRol().getNombreRol() %></td>
-                <td><span class="<%= badgeClass %>"><%= estado %></span></td>
-                <td>
-                    <div class="btn-group" role="group" aria-label="Acciones">
-                        <button type="button" class="btn btn-outline-primary btn-action"
-                            onclick="verDocumentoURL('<%= contextPath %>/verDocumento?nombre=<%= nombreArchivo %>')">
-                            Ver Informe
-                        </button>
-                        <button type="button" class="btn btn-outline-primary btn-action"
-                            onclick="mostrarModalFirma(<%= informe.getInformeID() %>)"
-                            <%= deshabilitarBotones ? "disabled" : "" %>>
-                            Aprobar
-                        </button>
-                        <button type="button" class="btn btn-outline-primary btn-action"
-                            onclick="mostrarModalRechazo(<%= informe.getInformeID() %>)"
-                            <%= deshabilitarBotones ? "disabled" : "" %>>
-                            Rechazar
-                        </button>
-                    </div>
-                </td>
-            </tr>
-            <%  }
-                } else { %>
-            <tr>
-                <td colspan="5">No hay informes pendientes.</td>
-            </tr>
-            <% } %>
+                        <tr>
+                            <td>
+                                <span class="archivo-link text-primary" style="cursor:pointer;"
+                                      onclick="verDocumento(${informe.informeID})">
+                                    ${nombreArchivo}
+                                </span>
+                            </td>
+                            <td>${informe.fechaEnvio}</td>
+                            <td>${informe.rol.nombreRol}</td>
+                            <td><span class="${badgeClass}">${estadoInf}</span></td>
+                            <td>
+                                <div class="btn-group" role="group" aria-label="Acciones">
+                                    <button class="btn btn-outline-primary"
+                                            onclick="verDocumento(${informe.informeID})">
+                                        <i class="fas fa-eye"></i> Ver Informe
+                                    </button>
+                                    <button type="button" class="btn btn-outline-primary btn-action"
+                                            onclick="mostrarModalFirma(${informe.informeID})"
+                                            <c:if test="${deshabilitarBotones}">disabled</c:if>>
+                                        Aprobar
+                                    </button>
+                                    <button type="button" class="btn btn-outline-primary btn-action"
+                                            onclick="mostrarModalRechazo(${informe.informeID})"
+                                            <c:if test="${deshabilitarBotones}">disabled</c:if>>
+                                        Rechazar
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </c:forEach>
+                </c:when>
+                <c:otherwise>
+                    <tr>
+                        <td colspan="5">No hay informes pendientes.</td>
+                    </tr>
+                </c:otherwise>
+            </c:choose>
         </tbody>
     </table>
 </section>
 
-<!-- Modal para mostrar PDF -->
-<div id="modalDocumento" class="modal">
-    <div class="modal-contenido" style="height: 80vh; position: relative;">
-        <button class="btn-cerrar" style="position: absolute; top: 10px; right: 10px;"
-                onclick="cerrarModal('modalDocumento')">Cerrar ✖</button>
-        <iframe id="visorDocumento" src="" width="100%" height="100%" frameborder="0"></iframe>
+<!-- Modal para Ver Informe PDF -->
+<div class="modal fade" id="modalVerInforme" tabindex="-1" aria-labelledby="modalVerInformeLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalVerInformeLabel">Visualizar Informe</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar">Cerrar X</button>
+      </div>
+      <div class="modal-body">
+        <iframe id="iframeInforme" src="" width="100%" height="600px" style="border:none;"></iframe>
+      </div>
     </div>
+  </div>
 </div>
 
 <!-- Modal Aprobar -->
@@ -153,19 +170,17 @@
     <div class="modal-contenido">
         <button class="btn-cerrar" style="float:right;" onclick="cerrarModal('modalFirma')">Cerrar ✖</button>
         <h3>Aprobar Informe</h3>
-        <form action="<%= contextPath %>/procesarInforme" method="post">
+        <form action="${contextPath}/procesarInforme" method="post">
             <input type="hidden" name="informeId" id="firma_informeId" />
             <input type="hidden" name="accion" value="aprobar" />
-
             <label for="usuario">Usuario:</label>
             <input type="text" id="usuario" name="usuario" required />
-
             <label for="contrasena">Contraseña:</label>
             <input type="password" id="contrasena" name="contrasena" required />
-
-            <br /><br />
+            <br/><br/>
             <button type="submit" class="btn btn-outline-primary">Confirmar Firma</button>
-            <button type="button" class="btn btn-outline-primary" onclick="cerrarModal('modalFirma')">Cancelar</button>
+            <button type="button" class="btn btn-outline-primary"
+                    onclick="cerrarModal('modalFirma')">Cancelar</button>
         </form>
     </div>
 </div>
@@ -175,20 +190,20 @@
     <div class="modal-contenido">
         <button class="btn-cerrar" style="float:right;" onclick="cerrarModal('modalRechazo')">Cerrar ✖</button>
         <h3>Rechazar Informe</h3>
-        <form method="post" action="<%= contextPath %>/procesarInforme">
+        <form method="post" action="${contextPath}/procesarInforme">
             <input type="hidden" name="informeId" id="rechazo_informeId" />
             <input type="hidden" name="accion" value="rechazar" />
-
-            <label for="comentario">Comentario:</label><br />
-            <textarea id="comentario" name="comentario" rows="4" cols="50" required></textarea><br />
-
+            <label for="comentario">Comentario:</label><br/>
+            <textarea id="comentario" name="comentario" rows="4" cols="50" required></textarea><br/>
             <button type="submit" class="btn btn-outline-primary">Enviar Rechazo</button>
-            <button type="button" class="btn btn-outline-primary" onclick="cerrarModal('modalRechazo')">Cancelar</button>
+            <button type="button" class="btn btn-outline-primary"
+                    onclick="cerrarModal('modalRechazo')">Cancelar</button>
         </form>
     </div>
 </div>
 
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/jefeUnidad.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script type="text/javascript" src="${contextPath}/js/jefeUnidad.js"></script>
+<script src="${contextPath}/js/documento.js"></script>
 </body>
 </html>

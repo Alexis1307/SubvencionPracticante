@@ -26,11 +26,22 @@ public class Planilla {
 
     @Column(name = "EstadoPlanilla", nullable = false, length = 50)
     private String estadoPlanilla;
+    
+    @Column(name = "NombrePlanilla", nullable = false, length = 50)
+    private String nombrePlanilla;
 
 
     // Getters y setters
 
-    public Integer getPlanillaId() {
+    public String getNombrePlanilla() {
+		return nombrePlanilla;
+	}
+
+	public void setNombrePlanilla(String nombrePlanilla) {
+		this.nombrePlanilla = nombrePlanilla;
+	}
+
+	public Integer getPlanillaId() {
         return planillaId;
     }
 

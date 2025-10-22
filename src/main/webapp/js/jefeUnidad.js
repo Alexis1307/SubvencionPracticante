@@ -251,13 +251,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-function verDocumento(basePath, archivo, tipo) {
-        const url = `${basePath}/verInforme?archivo=${encodeURIComponent(archivo)}&tipo=${tipo}`;
-        const visor = document.getElementById('visorDocumento');
-        visor.src = url;
-        document.getElementById('modalDocumento').style.display = 'flex';
-    }
-
     function mostrarModalFirma(informeId) {
         document.getElementById('firma_informeId').value = informeId;
         document.getElementById('modalFirma').style.display = 'flex';
@@ -279,8 +272,3 @@ function verDocumento(basePath, archivo, tipo) {
     function cerrarSesion() {
         window.location.href = "<%= contextPath %>/logout";
     }
-	
-	function verDocumentoURL(url) {
-	    document.getElementById("visorDocumento").src = url;
-	    document.getElementById("modalDocumento").style.display = "block";
-	}

@@ -72,5 +72,13 @@ public class Usuario {
 	public boolean esJefeUnidad() {
 	    return nombreUsuario.equalsIgnoreCase("jefeUnidad");
 	}
+	
+	public boolean esRrhh() {
+	    return this.nombreUsuario != null && this.nombreUsuario.equalsIgnoreCase("rrhh");
+	}
 
+	public boolean esEspecialista() {
+	    return nombreUsuario.equalsIgnoreCase("especialista");
+	}
+	
 }

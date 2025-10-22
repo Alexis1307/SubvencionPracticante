@@ -15,7 +15,7 @@ import jakarta.persistence.TypedQuery;
 import model.Informe;
 
 public class InformeDAO {
-	private EntityManagerFactory emf = Persistence.createEntityManagerFactory("sqlserver");
+	private static EntityManagerFactory emf = Persistence.createEntityManagerFactory("sqlserver");
 	
 	public boolean guardarInforme(Informe informe) {
 		EntityManager em = emf.createEntityManager();
@@ -124,7 +124,7 @@ public class InformeDAO {
 	        }
 	    }
 	 
-	 public Informe obtenerInformePorId(int id) {
+	 public static Informe obtenerInformePorId(int id) {
 		    EntityManager em = emf.createEntityManager();
 		    try {
 		        return em.find(Informe.class, id);
@@ -133,11 +133,58 @@ public class InformeDAO {
 		    }
 	 }
 	 
-	 public List<Informe> obtenerInformesPorEstado(String estado) {
+	 public List<Informe> obtenerInformesPorEstados(List<String> estados) {
 		    EntityManager em = emf.createEntityManager();
-	        String jpql = "SELECT i FROM Informe i WHERE i.estado = :estado ORDER BY i.fechaEnvio DESC";
-	        TypedQuery<Informe> query = em.createQuery(jpql, Informe.class);
-	        query.setParameter("estado", estado);
-	        return query.getResultList();
-	    }
+		    try {
+		        TypedQuery<Informe> query = em.createQuery(
+		            "SELECT i FROM Informe i WHERE i.estado IN :estados ORDER BY i.fechaEnvio DESC", Informe.class);
+		        query.setParameter("estados", estados);
+		        return query.getResultList();
+		    } finally {
+		        em.close();
+		    }
+		}
+
+	 
+	 public List<Informe> obtenerTodosLosInformes() {
+		    EntityManager em = emf.createEntityManager();
+		    try {
+		        TypedQuery<Informe> query = em.createQuery(
+		            "SELECT i FROM Informe i ORDER BY i.fechaEnvio DESC", Informe.class);
+		        return query.getResultList();
+		    } finally {
+		        em.close();
+		    }
+		}
+
+	 public List<Informe> obtenerInformesAprobados() {
+		    EntityManager em = emf.createEntityManager();
+		    try {
+		        TypedQuery<Informe> query = em.createQuery(
+		            "SELECT i FROM Informe i WHERE i.estado = 'Aprobado' ORDER BY i.fechaEnvio DESC", 
+		            Informe.class);
+		        return query.getResultList();
+		    } finally {
+		        em.close();
+		    }
+		}
+
+	 public List<Informe> obtenerInformesAprobadosPorMesAnio(int mes, int anio) {
+		    EntityManager em = emf.createEntityManager();
+		    try {
+		        TypedQuery<Informe> query = em.createQuery(
+		            "SELECT i FROM Informe i " +
+		            "WHERE i.estado = 'Aprobado' " +
+		            "AND FUNCTION('MONTH', i.fechaEnvio) = :mes " +
+		            "AND FUNCTION('YEAR', i.fechaEnvio) = :anio " +
+		            "ORDER BY i.fechaEnvio DESC", Informe.class);
+		        query.setParameter("mes", mes);
+		        query.setParameter("anio", anio);
+		        return query.getResultList();
+		    } finally {
+		        em.close();
+		    }
+		}
+
+	 
 }

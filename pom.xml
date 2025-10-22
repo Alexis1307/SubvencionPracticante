@@ -76,8 +76,34 @@
 		    <artifactId>jakarta.servlet.jsp.jstl</artifactId>
 		    <version>3.0.0</version>
 		</dependency>
-    </dependencies>
-
+		<!-- Apache POI core -->
+		  <dependency>
+		    <groupId>org.apache.poi</groupId>
+		    <artifactId>poi</artifactId>
+		    <version>5.2.3</version>
+		  </dependency>
+		
+		  <!-- Apache POI para archivos .xlsx -->
+		  <dependency>
+		    <groupId>org.apache.poi</groupId>
+		    <artifactId>poi-ooxml</artifactId>
+		    <version>5.2.3</version>
+		  </dependency>
+		  <!-- Apache POI core -->
+		  <dependency>
+		    <groupId>org.apache.poi</groupId>
+		    <artifactId>poi</artifactId>
+		    <version>5.2.3</version>
+		  </dependency>
+		
+		  <!-- Apache POI para archivos .xlsx -->
+		  <dependency>
+		    <groupId>org.apache.poi</groupId>
+		    <artifactId>poi-ooxml</artifactId>
+		    <version>5.2.3</version>
+		  </dependency>
+  
+		</dependencies>
     <build>
         <finalName>subvencion-app</finalName>  
     </build>
