@@ -25,7 +25,7 @@ public class GenerarPlanillaServlet extends HttpServlet {
     private InformeDAO informeDAO = new InformeDAO();
     private PlanillaDAO planillaDAO = new PlanillaDAO();
 
-    private static final String CARPETA_DESTINO = "C:\\ProyectoSubvencionPDF\\especialista";
+    private static final String CARPETA_DESTINO = "C:\\SubvencionPracticante\\ProyectoSubvencionPDF\\especialista";
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)

@@ -13,6 +13,7 @@ import model.Notificacion;
 import model.Usuario;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 @WebServlet("/especialista")
@@ -38,6 +39,7 @@ public class EspecialistaServlet extends HttpServlet {
         }
 
         List<Informe> informes = informeDAO.obtenerTodosLosInformes();
+        Collections.reverse(informes);
         
         List<Notificacion> notificaciones = NotificacionDAO.obtenerPorUsuario(usuario.getUsuarioId());
         request.setAttribute("notificaciones", notificaciones);

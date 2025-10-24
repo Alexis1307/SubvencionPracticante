@@ -2,6 +2,7 @@ package servlet;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 
 import dao.InformeDAO;
@@ -46,7 +47,6 @@ public class RrhhServlet extends HttpServlet {
 
         List<String> estadosDeseados = List.of("En revision", "Aprobado", "Rechazado");
         List<Informe> informes = informeDAO.obtenerInformesPorEstados(estadosDeseados);
-
         List<Notificacion> notificaciones = notificacionDAO.obtenerPorUsuario(usuario.getUsuarioId());
 
         System.out.println("Cantidad de informes traídos: " + informes.size());
@@ -54,7 +54,8 @@ public class RrhhServlet extends HttpServlet {
             System.out.println(i.getInformeID() + " - " + i.getEstado());
         }
 
-        
+        Collections.reverse(informes);
+
         request.setAttribute("informes", informes);
         request.setAttribute("notificaciones", notificaciones);
         request.getRequestDispatcher("views/rrhh.jsp").forward(request, response);

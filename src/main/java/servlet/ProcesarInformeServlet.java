@@ -29,9 +29,8 @@ public class ProcesarInformeServlet extends HttpServlet {
     private UsuarioDAO usuarioDAO = new UsuarioDAO(emf);
     private FirmaDigitalDAO firmaDigitalDAO = new FirmaDigitalDAO(emf);
 
-    private static final String RUTA_FIRMA = "C:\\ProyectoSubvencionPDF\\firmasDigitales\\firma.png";
-    private static final String RUTA_DOCS_JEFE = "C:\\ProyectoSubvencionPDF\\jefeUnidad\\";
-
+    private static final String RUTA_FIRMA = "C:\\SubvencionPracticante\\ProyectoSubvencionPDF\\firmasDigitales\\firma.png";
+    private static final String RUTA_DOCS_JEFE = "C:\\SubvencionPracticante\\ProyectoSubvencionPDF\\jefeUnidad\\";
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession(false);
@@ -61,19 +60,15 @@ public class ProcesarInformeServlet extends HttpServlet {
             if (usuarioInput == null || contrasenaInput == null ||
                 !usuarioInput.equals("jefeUnidad") || !contrasenaInput.equals("123")) {
 
-                request.setAttribute("mensaje", "Credenciales inválidas. No se pudo insertar la firma digital.");
-                request.setAttribute("tipoMensaje", "error");
+            	request.setAttribute("mensajeErrorFirma", "Usuario o Contraseña incorrectas.");
+                request.setAttribute("informeIdModal", informeId); // Para saber qué informe abrir
+                request.setAttribute("abrirModal", true);
 
                 // JefeUnidad ve todos los informes
                 List<Informe> informes = informeDAO.obtenerTodosLosInformes();
                 request.setAttribute("informes", informes);
 
-                if ("rrhh".equals(nombreUsuario)) {
-                    request.getRequestDispatcher("/rrhh.jsp").forward(request, response);
-                } else {
-                    request.getRequestDispatcher("/jefeUnidad.jsp").forward(request, response);
-                }
-
+                request.getRequestDispatcher("/jefeUnidad.jsp").forward(request, response);
                 return;
             }
 

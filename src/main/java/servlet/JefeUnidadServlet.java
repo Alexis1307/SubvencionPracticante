@@ -11,6 +11,7 @@ import model.Notificacion;
 import model.Usuario;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,8 +45,8 @@ public class JefeUnidadServlet extends HttpServlet {
             return;
         }
 
-        // ✅ Cambiar esto: obtener todos los informes
         List<Informe> informes = informeDAO.obtenerTodosLosInformes();
+        Collections.reverse(informes);
 
         for (Informe inf : informes) {
             System.out.println("Informe ID " + inf.getInformeID() + " - Estado: " + inf.getEstado());

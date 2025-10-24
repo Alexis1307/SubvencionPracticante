@@ -33,7 +33,7 @@ public class ElaborarInformeServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     // Ruta base donde se guardarán los PDFs
-    private static final String PDF_BASE_PATH = "C:\\ProyectoSubvencionPDF\\practicante";
+    private static final String PDF_BASE_PATH = "C:\\SubvencionPracticante\\ProyectoSubvencionPDF\\practicante";
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         System.out.println("Elaborar Informe");

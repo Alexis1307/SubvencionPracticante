@@ -49,9 +49,9 @@
             </ul>
         </div>
 
-        <form action="${contextPath}/logout" method="post" class="d-inline ms-3">
-            <button type="submit" class="btn btn-light btn-sm" id="logoutBtn">
-                <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+        <form action="${pageContext.request.contextPath}/logout" method="post" class="d-inline">
+        	<button type="submit" class="btn btn-light btn-sm" id="logoutBtn">
+            	<i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
             </button>
         </form>
     </div>
@@ -82,7 +82,8 @@
     <table class="table">
         <thead>
             <tr>
-                <th>Archivo</th>
+                <th>Nombre Practicante</th>
+                <th>Asunto</th>
                 <th>Fecha</th>
                 <th>Área</th>
                 <th>Estado</th>
@@ -110,12 +111,8 @@
                         <c:set var="deshabilitarBotones" value="${not (estadoInf eq 'Pendiente')}" />
 
                         <tr>
-                            <td>
-                                <span class="archivo-link text-primary" style="cursor:pointer;"
-                                      onclick="verDocumento(${informe.informeID})">
-                                    ${nombreArchivo}
-                                </span>
-                            </td>
+                            <td>${informe.practicante.nombreUsuario}</td>
+                            <td>${informe.asunto}</td>
                             <td>${informe.fechaEnvio}</td>
                             <td>${informe.rol.nombreRol}</td>
                             <td><span class="${badgeClass}">${estadoInf}</span></td>
@@ -126,10 +123,10 @@
                                         <i class="fas fa-eye"></i> Ver Informe
                                     </button>
                                     <button type="button" class="btn btn-outline-primary btn-action"
-                                            onclick="mostrarModalFirma(${informe.informeID})"
-                                            <c:if test="${deshabilitarBotones}">disabled</c:if>>
-                                        Aprobar
-                                    </button>
+									        onclick="mostrarModalFirma(${informe.informeID})"
+									        <c:if test="${deshabilitarBotones}">disabled="disabled"</c:if>>
+									    Aprobar
+									</button>
                                     <button type="button" class="btn btn-outline-primary btn-action"
                                             onclick="mostrarModalRechazo(${informe.informeID})"
                                             <c:if test="${deshabilitarBotones}">disabled</c:if>>
@@ -170,8 +167,14 @@
     <div class="modal-contenido">
         <button class="btn-cerrar" style="float:right;" onclick="cerrarModal('modalFirma')">Cerrar ✖</button>
         <h3>Aprobar Informe</h3>
+        <!-- Mensaje de error -->
+        <c:if test="${not empty mensajeErrorFirma}">
+            <div class="alert alert-danger">
+                ${mensajeErrorFirma}
+            </div>
+        </c:if>
         <form action="${contextPath}/procesarInforme" method="post">
-            <input type="hidden" name="informeId" id="firma_informeId" />
+            <input type="hidden" name="informeId" id="firma_informeId" value="${informeIdModal}" />
             <input type="hidden" name="accion" value="aprobar" />
             <label for="usuario">Usuario:</label>
             <input type="text" id="usuario" name="usuario" required />
@@ -203,7 +206,12 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+	var abrirModalFirma = "<c:out value='${abrirModal}' />";
+	var informeIdModal = <c:out value='${informeIdModal != null ? informeIdModal : 0}' />;
+</script>
 <script type="text/javascript" src="${contextPath}/js/jefeUnidad.js"></script>
 <script src="${contextPath}/js/documento.js"></script>
+
 </body>
 </html>

@@ -222,7 +222,8 @@ document.addEventListener('DOMContentLoaded', () => {
             modal.show();
         });
     });
-
+	
+	
     // Botones rechazar
     document.querySelectorAll('.btn-action-rechazar').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -251,6 +252,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+window.addEventListener('DOMContentLoaded', (event) => {
+	    if (abrirModalFirma === 'true') {
+	        document.getElementById('modalFirma').style.display = 'block';
+	    }
+	});
+	
+	if (abrirModalFirma === 'true') {
+	    mostrarModalFirma(informeIdModal);
+	}
+
+
     function mostrarModalFirma(informeId) {
         document.getElementById('firma_informeId').value = informeId;
         document.getElementById('modalFirma').style.display = 'flex';
@@ -268,7 +280,20 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('visorDocumento').src = '';
         }
     }
+	
+	const init = () => {
+	    setupLogoutConfirmation();
+	  };
+	  
+	const setupLogoutConfirmation = () => {
+	    const logoutBtn = document.getElementById('logoutBtn');
+	    if (!logoutBtn) return;
 
-    function cerrarSesion() {
-        window.location.href = "<%= contextPath %>/logout";
-    }
+	    const form = logoutBtn.closest('form');
+	    form.addEventListener('submit', (e) => {
+	      const confirmed = confirm('¿Estás seguro de que deseas cerrar sesión?');
+	      if (!confirmed) {
+	        e.preventDefault();
+	      }
+	    });
+	  };

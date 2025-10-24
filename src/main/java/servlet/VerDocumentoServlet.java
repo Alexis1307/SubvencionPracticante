@@ -43,7 +43,7 @@ public class VerDocumentoServlet extends HttpServlet {
         }
 
         // Determinar la ruta del archivo
-        String rutaBase = "C:/ProyectoSubvencionPDF/";
+        String rutaBase = "C:/SubvencionPracticante/ProyectoSubvencionPDF/";
         String subcarpeta = "";
         String nombreArchivo = "";
 

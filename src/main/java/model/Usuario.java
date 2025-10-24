@@ -21,10 +21,8 @@ public class Usuario {
     private String nombreUsuario;
     @Column(name = "ContrasenaHash")
     private String contra;
-    // Mantenemos rolId solo para compatibilidad
     @Column(name = "RolId", insertable = false, updatable = false)
     private int rolId;
-    // Relación ManyToOne con Rol
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "RolId")
     private Rol rol;

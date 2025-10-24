@@ -2,6 +2,7 @@ package dao;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.Persistence;
 import jakarta.persistence.TypedQuery;
@@ -58,6 +59,22 @@ public class UsuarioDAO {
 	    } catch (NoResultException e) {
 	        System.out.println("No se encontró el jefe de unidad.");
 	        return null;
+	    } finally {
+	        em.close();
+	    }
+	}
+	
+	public void guardar(Usuario usuario) {
+	    EntityManager em = emf.createEntityManager();
+	    EntityTransaction tx = em.getTransaction();
+	    try {
+	        tx.begin();
+	        em.persist(usuario);
+	        tx.commit();
+	    } catch (Exception e) {
+	        if (tx.isActive()) tx.rollback();
+	        e.printStackTrace();
+	        throw e;
 	    } finally {
 	        em.close();
 	    }

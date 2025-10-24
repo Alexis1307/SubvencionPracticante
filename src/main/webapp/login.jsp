@@ -84,6 +84,7 @@ if (sesion != null && sesion.getAttribute("usuarioLogueado") != null) {
                 </div>
 
                 <div class="form-options">
+                	<a href="${pageContext.request.contextPath}/nuevoUsuario">Registrarse</a>
                     <label class="checkbox-wrapper">
                         <input type="checkbox" id="remember" name="remember">
                         <span class="checkbox-label">Recordarme</span>
