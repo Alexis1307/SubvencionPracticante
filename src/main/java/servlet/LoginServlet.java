@@ -26,6 +26,7 @@ public class LoginServlet extends HttpServlet {
     public void init() throws ServletException {
         emf = Persistence.createEntityManagerFactory("sqlserver");
         usuarioDAO = new UsuarioDAO(emf);
+        System.out.println("Loginnnnnnnnnnnnnnnnnn");
     }
 
     @Override

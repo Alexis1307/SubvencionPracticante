@@ -9,6 +9,7 @@ if (sesion != null && sesion.getAttribute("usuarioLogueado") != null) {
     return;
 }
 %>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -156,4 +157,4 @@ if (sesion != null && sesion.getAttribute("usuarioLogueado") != null) {
 
     <script src="${pageContext.request.contextPath}/js/login.js"></script>
 </body>
-</html>
+</html>	

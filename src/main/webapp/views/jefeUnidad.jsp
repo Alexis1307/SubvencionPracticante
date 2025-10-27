@@ -30,7 +30,6 @@
         <a href="#inicio">Inicio</a>
     </div>
 
-    <!-- Aquí podrías poner el dropdown de notificaciones si ya se pasan como atributo -->
     <div class="navbar-right d-flex align-items-center">
         <div class="dropdown ms-auto">
             <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
