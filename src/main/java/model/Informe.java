@@ -26,7 +26,7 @@ public class Informe {
     private String asunto;
     @Column(name = "PeriodoPracticasMeses")
     private int periodoPracticas;
-    @Column(name = "Actividades")
+    @Column(name = "Actividades", columnDefinition = "TEXT")
     private String actividades;
     @Column(name = "RutaDocumento")
     private String rutaDocumento;

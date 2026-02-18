@@ -89,13 +89,11 @@ public class ElaborarInformeServlet extends HttpServlet {
             return;
         }
         
-        Rol rol = new Rol();
 
         Informe informe = new Informe();
         informe.setPracticante(practicante);
         informe.setAsunto(asunto);
-        rol.setRolId(practicante.getRolId());
-        informe.setRol(rol);
+        informe.setRol(practicante.getRol()); 
         informe.setPeriodoPracticas(periodo);
         informe.setActividades(actividades);
         informe.setRutaDocumento(rutaCompleta); 
