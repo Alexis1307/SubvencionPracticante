@@ -1,6 +1,8 @@
 package model;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -20,20 +22,16 @@ public class Informe {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "InformeId")
     private int informeID;
-    @Column(name = "PracticanteId", insertable = false, updatable = false)
-    private int practicanteId;
     @Column(name = "Asunto")
     private String asunto;
-    @Column(name = "RolId", insertable = false, updatable = false)
-    private int rolId;
     @Column(name = "PeriodoPracticasMeses")
     private int periodoPracticas;
-    @Column(name = "Actividades")
+    @Column(name = "Actividades", columnDefinition = "TEXT")
     private String actividades;
     @Column(name = "RutaDocumento")
     private String rutaDocumento;
     @Column(name = "FechaEnvio")
-    private LocalDateTime fechaEnvio;
+    private LocalDate fechaEnvio;
     @Column(name = "EstadoInforme")
     private String estado;
     @ManyToOne(fetch = FetchType.EAGER)
@@ -42,6 +40,11 @@ public class Informe {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "RolId")
     private Rol rol;
+    @Column(name = "NombreDocumento")
+    private String nombreDocumento;
+    @Column(name = "RutaDocumentoFirmado")
+    private String rutaDocumentoFirmado;
+
 	
 	
 	public int getInformeID() {
@@ -50,23 +53,11 @@ public class Informe {
 	public void setInformeID(int informeID) {
 		this.informeID = informeID;
 	}
-	public int getPracticanteId() {
-		return practicanteId;
-	}
-	public void setPracticanteId(int practicanteId) {
-		this.practicanteId = practicanteId;
-	}
 	public String getAsunto() {
 		return asunto;
 	}
 	public void setAsunto(String asunto) {
 		this.asunto = asunto;
-	}
-	public int getRolId() {
-		return rolId;
-	}
-	public void setRolId(int rolId) {
-		this.rolId = rolId;
 	}
 	public int getPeriodoPracticas() {
 		return periodoPracticas;
@@ -86,10 +77,11 @@ public class Informe {
 	public void setRutaDocumento(String rutaDocumento) {
 		this.rutaDocumento = rutaDocumento;
 	}
-	public LocalDateTime getFechaEnvio() {
+	
+	public LocalDate getFechaEnvio() {
 		return fechaEnvio;
 	}
-	public void setFechaEnvio(LocalDateTime fechaEnvio) {
+	public void setFechaEnvio(LocalDate fechaEnvio) {
 		this.fechaEnvio = fechaEnvio;
 	}
 	public String getEstado() {
@@ -107,10 +99,31 @@ public class Informe {
         this.rol = rol;
     }
     
+	public Usuario getPracticante() {
+		return practicante;
+	}
+	
+	public void setPracticante(Usuario practicante) {
+		this.practicante = practicante;
+	}
+	
+	
+	public String getNombreDocumento() {
+		return nombreDocumento;
+	}
+	public void setNombreDocumento(String nombreDocumento) {
+		this.nombreDocumento = nombreDocumento;
+	}
+	public String getRutaDocumentoFirmado() {
+		return rutaDocumentoFirmado;
+	}
+	public void setRutaDocumentoFirmado(String rutaDocumentoFirmado) {
+		this.rutaDocumentoFirmado = rutaDocumentoFirmado;
+	}
 	@Override
 	public String toString() {
-		return "Informe [informeID=" + informeID + ", practicanteId=" + practicanteId + ", asunto=" + asunto
-				+ ", rolId=" + rolId + ", periodoPracticas=" + periodoPracticas + ", actividades=" + actividades
+		return "Informe [informeID=" + informeID + ", practicanteId=" + ", asunto=" + asunto
+				+ ", rolId=" + ", periodoPracticas=" + periodoPracticas + ", actividades=" + actividades
 				+ ", rutaDocumento=" + rutaDocumento + ", fechaEnvio=" + fechaEnvio + ", estado=" + estado + "]";
 	}
 }

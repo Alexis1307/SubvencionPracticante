@@ -1,72 +1,268 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="java.io.File" %>
-<%@ page import="java.util.Map" %>
-<%@ page import="java.util.*, model.Informe, model.Usuario" %>
-<%!
-    public String getEstadoClass(String estado) {
-        if ("Aprobado".equalsIgnoreCase(estado)) {
-            return "estado-aprobado";
-        } else if ("En revisión".equalsIgnoreCase(estado) || "Pendiente".equalsIgnoreCase(estado)) {
-            return "estado-revision";
-        } else if ("Rechazado".equalsIgnoreCase(estado)) {
-            return "estado-rechazado";
-        }
-        return "";
-    }
-%>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ page import="jakarta.servlet.http.*, model.Usuario" %>
 <%
-    HttpSession sesion = request.getSession(false);
-    Usuario usuario = sesion != null ? (Usuario) sesion.getAttribute("usuarioLogueado") : null;
-    if (usuario == null) {
-        response.sendRedirect("../login.jsp");
-        return;
-    }
-
-    List<Informe> informes = (List<Informe>) request.getAttribute("informes");
-    Map<Integer, String> nombresRoles = (Map<Integer, String>) request.getAttribute("nombresRoles");
-
+HttpSession sesion = request.getSession(false);
+Usuario usuario = sesion != null ? (Usuario) sesion.getAttribute("usuarioLogueado") : null;
+if (usuario == null) {
+    response.sendRedirect(request.getContextPath() + "/login.jsp");
+    return;
+}
 %>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Practicante</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="Panel del Practicante - Sistema de Gestión de Subvenciones">
+    <title>Panel del Practicante | Sistema de Subvenciones</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/practicante.css">
 </head>
-<body>
-    <div class="container mt-5">
-        <h1>Bienvenido, <%= usuario.getNombreUsuario() %></h1>
+<body data-context-path="${pageContext.request.contextPath}">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-gradient-primary shadow-sm sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="${pageContext.request.contextPath}/panel">
+                <i class="fas fa-shield-halved me-2"></i>
+                <span class="fw-bold">Subvención</span>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="dropdown">
+			  <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+			    🔔 Notificaciones
+			  </button>
+			  <ul class="dropdown-menu dropdown-menu-end">
+			    <c:forEach var="noti" items="${notificaciones}">
+			      <li class="dropdown-item">
+			        <strong>${noti.mensaje}</strong><br />
+			        <small class="text-muted">${noti.fecha}</small>
+			      </li>
+			    </c:forEach>
+			    <c:if test="${empty notificaciones}">
+			      <li class="dropdown-item text-muted">No hay notificaciones</li>
+			    </c:if>
+			  </ul>
+			</div>
+            
 
-        <% if (informes == null || informes.isEmpty()) { %>
-            <p>No hay informes registrados.</p>
-        <% } else { %>
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Archivo</th>
-                        <th>Fecha</th>
-                        <th>Área</th>
-                        <th>Estado</th>
-                        <th>Acción</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% for (Informe informe : informes) { %>
-                        <tr onclick="verDocumento('<%= new File(informe.getRutaDocumento()).getName() %>')">
-                            <td><%= new File(informe.getRutaDocumento()).getName() %></td>
-                            <td><%= informe.getFechaEnvio().toLocalDate() %></td>
-							<td><%= nombresRoles.get(informe.getInformeID()) %></td>
-                            <td class="<%= getEstadoClass(informe.getEstado()) %>"><%= informe.getEstado() %></td>
-                            <td>
-                                <button class="btn btn-info btn-sm" onclick="event.stopPropagation(); mostrarModal('modalSinContenido')">
-                                    Ver observaciones
-                                </button>
-                            </td>
-                        </tr>
-                    <% } %>
-                </tbody>
-            </table>
-        <% } %>
-    </div>
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav ms-auto align-items-lg-center gap-3">
+                    <li class="nav-item">
+                        <div class="user-info">
+                            <i class="fas fa-user-circle me-2"></i>
+                            <span id="greeting">Hola, <%= usuario.getNombreUsuario() %></span>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <button id="darkModeToggle" class="btn btn-outline-light btn-sm" aria-label="Cambiar modo oscuro">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <form action="${pageContext.request.contextPath}/logout" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-light btn-sm" id="logoutBtn">
+                                <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container-fluid px-4 py-5">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="header-section d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+                    <div>
+                        <h1 class="page-title mb-2">Panel del Practicante</h1>
+                        <p class="text-muted mb-0">Gestiona tus informes y revisa tu progreso</p>
+                    </div>
+                    <a href="${pageContext.request.contextPath}/views/elaborar_informe.jsp" class="btn btn-primary btn-lg shadow-sm">
+                        <i class="fas fa-file-edit me-2"></i>Elaborar Informe
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-md-4">
+                <div class="stats-card card-animate">
+                    <div class="stats-icon-wrapper">
+                        <div class="stats-icon bg-primary">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                    </div>
+                    <div class="stats-content">
+						<h3 class="stats-number">${pendientes}</h3>
+                        <p class="stats-label">Informes Enviados</p>
+                        <div class="stats-progress">
+                            <div class="progress-bar bg-primary" style="width: 100%"></div>
+                        </div> 
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-card card-animate">
+                    <div class="stats-icon-wrapper">
+                        <div class="stats-icon bg-success">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                    <div class="stats-content">
+						<h3 class="stats-number">${aprobados}</h3>
+                        <p class="stats-label">Informes Aprobados</p>
+                        <div class="stats-progress">
+                            <div class="progress-bar bg-success" style="width: 60%"></div>
+                        </div> 
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-card card-animate">
+                    <div class="stats-icon-wrapper">
+                        <div class="stats-icon bg-warning">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                    </div>
+                     <div class="stats-content">
+						<h3 class="stats-number">${rechazados}</h3>
+                        <p class="stats-label">Informes Rechazados</p>
+                        <div class="stats-progress">
+                            <div class="progress-bar bg-warning" style="width: 40%"></div>
+                        </div> 
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card table-card shadow-sm card-animate">
+                    <div class="card-header bg-white border-bottom">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-list me-2 text-primary"></i>Mis Informes
+                            </h5>
+                            <div class="search-wrapper">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text" id="tableSearch" class="form-control form-control-sm search-input" placeholder="Buscar informes...">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0" id="informesTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="text-center">#</th>
+                                        <th>Asunto</th>
+                                        <th class="text-center">Periodo</th>
+                                        <th class="text-center">Fecha</th>
+                                        <th class="text-center">Estado</th>
+                                        <th class="text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+								    <c:forEach var="informe" items="${informes}" varStatus="status">
+								        <tr>
+								            <td class="text-center fw-bold">${status.index + 1}</td>
+								            <td>${informe.asunto}</td>
+								            <td class="text-center"> ${informe.periodoPracticas}</td>
+                            				<td>${informe.fechaEnvio}</td>
+								            <td class="text-center">
+								                <c:choose>
+								                    <c:when test="${informe.estado == 'Aprobado'}">
+								                        <span class="badge status-badge bg-success">Aprobado</span>
+								                    </c:when>
+								                    <c:when test="${informe.estado == 'Pendiente'}">
+								                        <span class="badge status-badge bg-warning">Pendiente</span>
+								                    </c:when>
+								                    <c:when test="${informe.estado == 'Rechazado'}">
+								                        <span class="badge status-badge bg-danger">Rechazado</span>
+								                    </c:when>
+								                    <c:otherwise>
+								                        <span class="badge status-badge bg-secondary">${informe.estado}</span>
+								                    </c:otherwise>
+								                </c:choose>
+								            </td>
+								            <td class="text-center">
+											    <div class="btn-group btn-group-sm" role="group">	
+														<button class="btn btn-outline-primary"
+														        onclick="verDocumento(${informe.informeID})">
+														    <i class="fas fa-eye"></i> Ver Informe
+														</button>
+								                
+											        <a href="${pageContext.request.contextPath}/archivos/${informe.rutaDocumento}"
+											           class="btn btn-outline-secondary"
+											           download
+											           data-bs-toggle="tooltip" title="Descargar">
+											            <i class="fas fa-download"></i>
+											        </a>
+											    </div>
+											</td>
+								        </tr>
+								    </c:forEach>
+								</tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer mt-5 py-4 bg-white border-top shadow-sm">
+        <div class="container-fluid px-4">
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="mb-0 text-muted">
+                        &copy; 2025 Sistema de Subvenciones. Todos los derechos reservados.
+                    </p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <div class="footer-links">
+                        <a href="#" class="text-muted text-decoration-none me-3">
+                            <i class="fas fa-question-circle me-1"></i>Ayuda
+                        </a>
+                        <a href="#" class="text-muted text-decoration-none me-3">
+                            <i class="fas fa-file-contract me-1"></i>Términos
+                        </a>
+                        <a href="#" class="text-muted text-decoration-none">
+                            <i class="fas fa-shield-alt me-1"></i>Privacidad
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Modal para Ver Informe PDF -->
+	<div class="modal fade" id="modalVerInforme" tabindex="-1" aria-labelledby="modalVerInformeLabel" aria-hidden="true">
+	  <div class="modal-dialog modal-xl modal-dialog-centered">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="modalVerInformeLabel">Visualizar Informe</h5>
+	        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+	      </div>
+	      <div class="modal-body">
+	        <iframe id="iframeInforme" src="" width="100%" height="600px" style="border:none;"></iframe>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>const contextPath = '<%= request.getContextPath() %>';</script>
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/practicante.js"></script>
+	<script src="${pageContext.request.contextPath}/js/documento.js"></script>
 </body>
 </html>

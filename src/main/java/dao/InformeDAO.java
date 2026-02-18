@@ -1,16 +1,21 @@
 package dao;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.Persistence;
+import jakarta.persistence.TypedQuery;
 import model.Informe;
 
 public class InformeDAO {
-	private EntityManagerFactory emf = Persistence.createEntityManagerFactory("sqlserver");
+	private static EntityManagerFactory emf = Persistence.createEntityManagerFactory("sqlserver");
 	
 	public boolean guardarInforme(Informe informe) {
 		EntityManager em = emf.createEntityManager();
@@ -40,13 +45,14 @@ public class InformeDAO {
 	public List<Informe> obtenerInformes(int practicanteId) {
 	    EntityManager em = emf.createEntityManager();
 	    try {
-	        return em.createQuery("SELECT i FROM Informe i WHERE i.practicanteId = :id", Informe.class)
-	                 .setParameter("id", practicanteId)
-	                 .getResultList();
-	    }catch (Exception e) {
+	        return em.createQuery(
+	            "SELECT i FROM Informe i WHERE i.practicante.usuarioId = :id", Informe.class)
+	            .setParameter("id", practicanteId)
+	            .getResultList();
+	    } catch (Exception e) {
 	        e.printStackTrace();
 	        return new ArrayList<>();
-	    }  finally {
+	    } finally {
 	        em.close();
 	    }
 	}
@@ -55,12 +61,11 @@ public class InformeDAO {
 	    EntityManager em = emf.createEntityManager();
 	    try {
 	        return em.createQuery(
-	                "SELECT i FROM Informe i WHERE i.estadoInforme = 'Pendiente' OR i.estadoInforme = 'En revisión'",
+	                "SELECT i FROM Informe i WHERE i.estado = 'Pendiente' OR i.estado = 'En revisión'",
 	                Informe.class)
 	                .getResultList();
 	    } catch (Exception e) {
-	        e.printStackTrace();
-	        return new ArrayList<>();
+	        throw new RuntimeException("Error al obtener informes pendientes", e);
 	    } finally {
 	        em.close();
 	    }
@@ -94,4 +99,92 @@ public class InformeDAO {
 
 	    return actualizado;
 	}
+	
+	 public void actualizarRutaInforme(int informeId, String nuevaRuta) {
+	        EntityManager em = emf.createEntityManager();
+	        EntityTransaction tx = em.getTransaction();
+
+	        try {
+	            tx.begin();
+
+	            Informe informe = em.find(Informe.class, informeId);
+	            if (informe != null) {
+	                informe.setRutaDocumento(nuevaRuta);
+	                em.merge(informe); // No es obligatorio aquí, pero es seguro
+	            }
+
+	            tx.commit();
+	        } catch (Exception e) {
+	            if (tx.isActive()) {
+	                tx.rollback();
+	            }
+	            e.printStackTrace();
+	        } finally {
+	            em.close();
+	        }
+	    }
+	 
+	 public static Informe obtenerInformePorId(int id) {
+		    EntityManager em = emf.createEntityManager();
+		    try {
+		        return em.find(Informe.class, id);
+		    } finally {
+		        em.close();
+		    }
+	 }
+	 
+	 public List<Informe> obtenerInformesPorEstados(List<String> estados) {
+		    EntityManager em = emf.createEntityManager();
+		    try {
+		        TypedQuery<Informe> query = em.createQuery(
+		            "SELECT i FROM Informe i WHERE i.estado IN :estados ORDER BY i.fechaEnvio DESC", Informe.class);
+		        query.setParameter("estados", estados);
+		        return query.getResultList();
+		    } finally {
+		        em.close();
+		    }
+		}
+
+	 
+	 public List<Informe> obtenerTodosLosInformes() {
+		    EntityManager em = emf.createEntityManager();
+		    try {
+		        TypedQuery<Informe> query = em.createQuery(
+		            "SELECT i FROM Informe i ORDER BY i.fechaEnvio DESC", Informe.class);
+		        return query.getResultList();
+		    } finally {
+		        em.close();
+		    }
+		}
+
+	 public List<Informe> obtenerInformesAprobados() {
+		    EntityManager em = emf.createEntityManager();
+		    try {
+		        TypedQuery<Informe> query = em.createQuery(
+		            "SELECT i FROM Informe i WHERE i.estado = 'Aprobado' ORDER BY i.fechaEnvio DESC", 
+		            Informe.class);
+		        return query.getResultList();
+		    } finally {
+		        em.close();
+		    }
+		}
+
+	 public List<Informe> obtenerInformesAprobadosPorMesAnio(int mes, int anio) {
+		    EntityManager em = emf.createEntityManager();
+		    try {
+		        TypedQuery<Informe> query = em.createQuery(
+		            "SELECT i FROM Informe i " +
+		            "WHERE i.estado = 'Aprobado' " +
+		            "AND FUNCTION('MONTH', i.fechaEnvio) = :mes " +
+		            "AND FUNCTION('YEAR', i.fechaEnvio) = :anio " +
+		            "ORDER BY i.fechaEnvio DESC", Informe.class);
+		        query.setParameter("mes", mes);
+		        query.setParameter("anio", anio);
+		        return query.getResultList();
+		    } finally {
+		        em.close();
+		    }
+		}
+
+	 
 }

@@ -12,11 +12,18 @@ import model.Rol;
 public class RolDAO {
 	private EntityManagerFactory emf = Persistence.createEntityManagerFactory("sqlserver");
 
-    /*public RolDAO(EntityManagerFactory emf) {
+    
+	
+	public RolDAO(EntityManagerFactory emf) {
+		super();
 		this.emf = emf;
-	}*/
+	}
+	
+	public RolDAO() {
+		
+	}
 
-    public String obtenerNombreRol(int rolId) {
+	public String obtenerNombreRol(int rolId) {
         EntityManager em = emf.createEntityManager();
         try {
             Rol rol = em.find(Rol.class, rolId);
@@ -35,5 +42,14 @@ public class RolDAO {
         
         TypedQuery<Rol> query = em.createQuery("SELECT r FROM Rol r", Rol.class);
         return query.getResultList();
+    }
+    
+    public Rol obtenerPorId(int id) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.find(Rol.class, id);
+        } finally {
+            em.close();
+        }
     }
 }
